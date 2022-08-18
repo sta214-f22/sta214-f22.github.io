@@ -1,0 +1,14 @@
+---
+title: Introduction to Poisson regression
+---
+
+October 3
+: Poisson distribution and Poisson regression
+
+October 5
+: Poisson regression
+
+October 7
+: **Lab**{: .label .label-purple } Lab 5
+
+: **Lab 4 Due**{: .label .label-red }
