@@ -13,12 +13,12 @@
 # you will see them accessed via {{ site.title }}, {{ site.github_repo }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
-title: STA 279, Spring 2022
-tagline: STA 279
+title: STA 214, Fall 2022
+tagline: STA 214
 description: Course materials, assignments, and syllabus
 author: Ciaran Evans
 baseurl: # the subpath of your site, e.g. /blog
-url: 'https://sta279-s22.github.io' # the base hostname & protocol for your site, e.g. http://example.com
+url: 'https://sta214-f22.github.io' # the base hostname & protocol for your site, e.g. http://example.com
 exclude: ["Gemfile", "Gemfile.lock", "LICENSE", "README.md"]
 
 # Theme settings
