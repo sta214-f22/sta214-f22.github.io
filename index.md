@@ -13,7 +13,7 @@ seo:
 {: .fs-6 .fw-300 }
 
 
-Welcome to the course website for STA 279!
+Welcome to the course website for STA 214!
 
 * Labs, assignments, and lecture notes can be found in the [Course Calendar](https://sta214-f22.github.io/calendar/)
 
