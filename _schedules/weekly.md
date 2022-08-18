@@ -21,9 +21,10 @@ timeline:
 schedule:
   - name: Monday
     events:
-      - name: STA 279 Class
+      - name: STA 214 Class
         start: 2:00 PM
         end: 2:50 PM
+        location: Manchester 121
       - name: Office Hours
         start: 3:00 PM
         end: 4:00 PM
@@ -31,22 +32,24 @@ schedule:
   - name: Tuesday
   - name: Wednesday
     events:
-      - name: STA 279 Class
+      - name: STA 214 Class
         start: 2:00 PM
         end: 2:50 PM
+        location: Manchester 121
       - name: Office Hours
-        start: 4:30 PM
-        end: 5:30 PM
+        start: 11:00 AM
+        end: 12:00 PM
         location: Manchester 329
   - name: Thursday
     events:
       - name: Office Hours
-        start: 12:00 PM
-        end: 2:00 PM
+        start: 10:00 AM
+        end: 12:00 PM
         location: Manchester 329
   - name: Friday
     events:
-      - name: STA 279 Class
+      - name: STA 214 Class
         start: 2:00 PM
         end: 2:50 PM
+        location: Manchester 121
 ---

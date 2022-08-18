@@ -6,7 +6,7 @@ October 31
 : Review
 
 November 2
-: Exam 2
+: **Exam 2**{: .label .label-red }
 
 November 4
 : Introduction to mixed effects models

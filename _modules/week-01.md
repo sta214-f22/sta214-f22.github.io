@@ -3,10 +3,10 @@ title: Binary data and logistic regression
 ---
 
 August 22
-: Welcome to STA 279, EDA + logistic regression
+: Welcome to STA 214, EDA + logistic regression
 
 : Install R and RStudio 
-  : [R and RStudio setup](https://sta279-s22.github.io/software_installation/)
+  : [R and RStudio setup](https://sta214-f22.github.io/software_installation/)
   
 : [ggplot2 cheat sheet](https://raw.githubusercontent.com/rstudio/cheatsheets/master/data-visualization.pdf)
 

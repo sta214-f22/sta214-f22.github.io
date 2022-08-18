@@ -67,7 +67,11 @@ Keep in mind that debugging software issues can take time, so make sure to start
 
 **Office hours:** You may attend office hours either in-person or virtually. If you plan to attend virtually, please let me know beforehand. For all office hours, sign up for 15-minute slots (one person per slot) [here](https://calendar.google.com/calendar/u/0/selfsched?sstoken=UU5FbWRMeTJRWGxafGRlZmF1bHR8YzljNjUzMDk5MzRhMTA0ZGJmY2NhZDcxNmViOGVlNGY). Please sign up for only one slot at a time. 
 
-Times: TBA
+Times: 
+
+* Monday 3:00pm -- 4:00pm
+* Wednesday 11:00am -- 12:00pm
+* Thursday 10:00am -- 12:00pm
 
 
 ## Course policies
