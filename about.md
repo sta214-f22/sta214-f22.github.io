@@ -71,7 +71,7 @@ Times:
 
 * Monday 3:00pm -- 4:00pm
 * Wednesday 11:00am -- 12:00pm
-* Thursday 10:00am -- 12:00pm
+* Thursday 2:00pm -- 3:00pm
 
 
 ## Course policies
@@ -79,10 +79,6 @@ Times:
 ### Communication
 
 While course materials will be posted on the course website, I will send messages and announcements through Canvas. Please make sure your Canvas account is set up so that you receive emails when I send these messages.
-
-### Food and drink
-
-Eating and drinking during class is not permitted, except in extenuating circumstances with permission of the instructor.
 
 ### Participation and illness
 
@@ -134,10 +130,7 @@ see the [College Judicial System](https://studentconduct.wfu.edu/the-judicial-co
 
 ### Professionalism
 
-Laptops will be used regularly in class, and you must bring one each day. You may also use laptops or tablets to take notes. Please refrain from using your laptop or tablet for anything other than coursework during class. 
-
-Cell phones may not be used during class for any reason. Keep phones stowed during class time.
-If you have a specific need to have a phone during a class period, please contact me.
+Laptops will be used regularly in class, and you must bring one each day. You may also use laptops or tablets to take notes. Please refrain from using your cellphone, laptop, or tablet for anything other than coursework during class. 
 
 ## Course components
 

@@ -12,6 +12,6 @@ Office hours:
     
 * Wednesday 11:00am -- 12:00pm
     
-* Thursday 10:00am -- 12:00pm
+* Thursday 2:00pm -- 3:00pm
 
 Sign up for 15-minute slots (one person per slot) [here](https://calendar.google.com/calendar/u/0/selfsched?sstoken=UU5FbWRMeTJRWGxafGRlZmF1bHR8YzljNjUzMDk5MzRhMTA0ZGJmY2NhZDcxNmViOGVlNGY). Please sign up for only one slot at a time. 

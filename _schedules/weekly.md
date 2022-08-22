@@ -43,8 +43,8 @@ schedule:
   - name: Thursday
     events:
       - name: Office Hours
-        start: 10:00 AM
-        end: 12:00 PM
+        start: 2:00 PM
+        end: 3:00 PM
         location: Manchester 329
   - name: Friday
     events:
