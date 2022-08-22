@@ -4,6 +4,7 @@ title: Binary data and logistic regression
 
 August 22
 : Welcome to STA 214, EDA + logistic regression
+  : [Slides](https://sta214-f22.github.io/slides/lecture_1.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture1.html)
 
 : Install R and RStudio 
   : [R and RStudio setup](https://sta214-f22.github.io/software_installation/)

@@ -1,0 +1,112 @@
+---
+title: "Class Activity, August 22"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+In this activity, you will start to investigate the relationship between wife's age and contraceptive use, using data from the National Indonesia Contraceptive Prevalence Survey.
+
+# Part I
+
+One way to examine the relationship between age and contraceptive use is with a table:
+
+| Age | Contraceptive use = 0| Contraceptive use = 1 | Total |
+|-------:|-----:|------:|-----:|
+|      20|    17|     11|    28|
+|      21|    19|     29|    48|
+|      22|    27|     32|    59|
+|      23|    21|     23|    44|
+|      24|    24|     37|    61|
+|      25|    33|     47|    80|
+|      26|    27|     42|    69|
+|      27|    23|     36|    59|
+|      28|    27|     36|    63|
+|      29|    18|     41|    59|
+|      30|    23|     41|    64|
+|      31|    20|     26|    46|
+|      32|    21|     43|    64|
+|      33|    16|     39|    55|
+|      34|    17|     33|    50|
+|      35|    17|     45|    62|
+| **Total**  | 350 | 561 | 911 |
+
+```{marginfigure}
+I say *empirical* probability here because we are estimating it from the observed data.
+```
+
+1. What is the (empirical) probability that a couple will use some contraception?
+
+2. What is the (empirical) probability that a couple will use some contraception, given that the wife is 20 years old? What about if the wife is 30 years old?
+
+3. If $\pi$ is the probability of some event, then the *odds* are $\dfrac{\pi}{1 - \pi}$. Calculate the (empirical) odds of contraceptive use when the wife is 20 years old, and also when the wife is 30 years old.
+
+
+# Part II
+
+So far, we've seen probabilities, $\pi$, and odds, $\dfrac{\pi}{1 - \pi}$. Another way of looking at a binary response is with the *log odds*, $\log \left( \dfrac{\pi}{1 - \pi} \right)$. Indeed, a logistic regression model for the relationship between age and contraceptive use would look like
+
+$\log \left( \dfrac{\pi}{1 - \pi} \right) = \beta_0 + \beta_1 \text{Age}$
+
+In these questions, we will start to think about the log odds.
+
+4. What range of values can the log odds take?
+
+The three scatterplots below show the empirical probabilities, odds, and log odds vs. wife's age for the contraception data.
+
+```{r echo=F, message=F, warning=F, fig.width=10, fig.height=3}
+library(tidyverse)
+library(patchwork)
+cmc_data <- read_csv("../slides/cmc.data.txt", col_names = F)
+colnames(cmc_data) <-c("WifeAge", "WifeEdu", "HusbandEdu", "NumChild", "WifeRel", "WifeWork", "HusbandOcc","Living", "Media", "Choice")
+cmc_data$Choice <- ifelse( cmc_data$Choice == 1, "None", ifelse(cmc_data$Choice==2, "Short", "Long"))
+cmc_data$ChoiceBin <- ifelse(cmc_data$Choice =="None", 0 , 1)
+cmc_data <- cmc_data %>% 
+  filter(WifeAge >= 20, WifeAge <= 35)
+
+p1 <- cmc_data %>%
+  group_by(WifeAge) %>%
+  summarize(prob = mean(ChoiceBin)) %>%
+  mutate(odds = prob/(1-prob),
+         logodds = log(odds)) %>%
+  ggplot(aes(x = WifeAge, y = prob)) +
+  geom_point(size=1.5) +
+  labs(x = "Wife's age (years)",
+       y = "Empirical probability of contraceptive use") +
+  theme_bw() 
+
+p2 <- cmc_data %>%
+  group_by(WifeAge) %>%
+  summarize(prob = mean(ChoiceBin)) %>%
+  mutate(odds = prob/(1-prob),
+         logodds = log(odds)) %>%
+  ggplot(aes(x = WifeAge, y = odds)) +
+  geom_point(size=1.5) +
+  labs(x = "Wife's age (years)",
+       y = "Empirical odds of contraceptive use") +
+  theme_bw() 
+
+p3 <- cmc_data %>%
+  group_by(WifeAge) %>%
+  summarize(prob = mean(ChoiceBin)) %>%
+  mutate(odds = prob/(1-prob),
+         logodds = log(odds)) %>%
+  ggplot(aes(x = WifeAge, y = logodds)) +
+  geom_point(size=1.5) +
+  labs(x = "Wife's age (years)",
+       y = "Empirical log odds of contraceptive use") +
+  theme_bw() 
+
+p1 + p2 + p3
+```
+
+5. True or false: if the log odds are an increasing function of $X$, then the probability is also an increasing function of $X$.
+
+Looking at the scatterplots, all three appear roughly linear. However, logistic regression models the log odds as a linear function of the predictor:
+
+$\log \left( \dfrac{\pi}{1 - \pi} \right) = \beta_0 + \beta_1 \text{Age}$
+
+6. In general, why is it not appropriate to model the probability, or the odds, as a linear function of the predictor?

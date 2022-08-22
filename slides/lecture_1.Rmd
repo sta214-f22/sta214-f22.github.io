@@ -1,0 +1,451 @@
+---
+author: "Dr. Ciaran Evans"
+title: Welcome to STA 214
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+### Welcome!
+
+.center[
+<img src="environmental-data-science-r4ds-general.png" alt="drawing" width="500"/>
+]
+
+.large[
+Course website: [https://sta214-f22.github.io/](https://sta214-f22.github.io/)
+]
+
+.footnote[
+Illustration: Updated from Grolemund & Wickham's classic R4DS schematic, envisioned by Dr. Julia Lowndes for her 2019 useR! keynote talk and illustrated by Allison Horst.
+]
+
+---
+
+### Agenda
+
+.large[
+* Introductions
+* Beginning logistic regression
+* Plan for week 1 and the semester
+* Syllabus highlights
+]
+
+---
+
+### Data
+
+.large[
+Using information from the National Indonesia Contraceptive Prevalence Survey, we are interested in studying the relationship between an individual's age and whether or not they use contraceptives.
+]
+
+.footnote[
+The data come from [http://archive.ics.uci.edu/ml/datasets/Contraceptive+Method+Choice](http://archive.ics.uci.edu/ml/datasets/Contraceptive+Method+Choice)
+]
+
+---
+
+### Data
+
+.large[
+Using information from the National Indonesia Contraceptive Prevalence Survey, we are interested in studying the relationship between an individual's age and whether or not they use contraceptives. 
+
+Information on 911 husband-wife couples, with wife aged between 20 and 35, and variables including:
+
+* Contraceptive method used (0 = none, 1 = some use)
+* Wife's age (in years)
+* Husband's age (in years)
+* Wife's education (1 = low, 2, 3, 4 = high)
+* Husband's education (1 = low, 2, 3, 4 = high)
+* Number of children ever born
+]
+
+---
+
+### Data
+
+.large[
+**Research question:** What is the relationship between wife's age and the use of contraceptives?
+
+**Response variable:** Contraceptive use (0 = no, 1 = yes)
+
+**Explanatory variable:** Wife's age (in years)
+]
+
+---
+
+### Exploratory data analysis (EDA)
+
+.large[
+.question[
+What plot can we use to visualize the response (contraceptive use)?
+]
+]
+
+---
+
+### Exploratory data analysis (EDA)
+
+.large[
+.question[
+What plot can we use to visualize the response (contraceptive use)?
+]
+
+**Answer:** Bar chart
+]
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=6, fig.height=4}
+library(tidyverse)
+cmc_data <- read_csv("cmc.data.txt", col_names = F)
+colnames(cmc_data) <-c("WifeAge", "WifeEdu", "HusbandEdu", "NumChild", "WifeRel", "WifeWork", "HusbandOcc","Living", "Media", "Choice")
+cmc_data$Choice <- ifelse( cmc_data$Choice == 1, "None", ifelse(cmc_data$Choice==2, "Short", "Long"))
+cmc_data$ChoiceBin <- ifelse(cmc_data$Choice =="None", 0 , 1)
+cmc_data <- cmc_data %>% 
+  filter(WifeAge >= 20, WifeAge <= 35)
+
+cmc_data %>%
+  ggplot(aes(x = as.factor(ChoiceBin))) +
+  geom_bar() +
+  labs(x = "Contraceptive use?") +
+  theme_bw() +
+  theme(text = element_text(size=20))
+```
+
+---
+
+### Exploratory data analysis (EDA)
+
+.large[
+.question[
+What plot can we use to visualize the explanatory variable (wife's age)?
+]
+]
+
+---
+
+### Exploratory data analysis (EDA)
+
+.large[
+.question[
+What plot can we use to visualize the explanatory variable (wife's age)?
+]
+
+**Answer:** Histogram (or boxplot)
+]
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=6, fig.height=4}
+
+cmc_data %>%
+  ggplot(aes(x = WifeAge)) +
+  geom_histogram(bins = 8) +
+  labs(x = "Wife's age (years)") +
+  theme_bw() +
+  theme(text = element_text(size=20))
+```
+
+---
+
+### Class activity, Part I
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture1.html](https://sta214-f22.github.io/class_activities/ca_lecture1.html)
+
+In the class activity, you'll start to explore the relationship between age and contraceptive use.
+
+Spend a few minutes to do the following:
+
+* Say hi to the people around you, introduce yourself
+* Work in groups on **Part I** of the class activity (questions 1 -- 3)
+* You don't need to submit your work
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+What is the (empirical) probability of contraceptive use?
+]
+]
+
+.large[
+$P(\text{Contraceptive use} = 1) =$
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+What is the (empirical) probability that a couple will use some contraception, given that the wife is 20 years old? What about if the wife is 30 years old?
+]
+]
+
+.large[
+$P(\text{Contraceptive use} = 1 | \text{Wife's age} = 20) =$
+
+$P(\text{Contraceptive use} = 1 | \text{Wife's age} = 30) =$
+]
+
+
+---
+
+
+## Odds
+
+.large[
+.question[
+What are the (empirical) odds of contraceptive use, if the wife's age is 20 years old? 30 years old?
+]
+]
+
+---
+
+### Conceptual question
+
+.large[
+.question[
+If the *odds* of an event are $> 1$, what is true about the *probability* of that event? Go to [https://pollev.com/ciaranevans637](https://pollev.com/ciaranevans637) to respond.
+]
+
+.abox[
+(A) probability $> 1$
+]
+
+.bbox[
+(B) probability $> 0.25$
+]
+
+.cbox[
+(C) probability $> 0.5$
+]
+
+.dbox[
+(D) probability $> 0.75$
+]
+
+]
+
+---
+
+### Conceptual question
+
+.large[
+.question[
+Probabilities are always between 0 and 1. What range of values can *odds* take? Go to [https://pollev.com/ciaranevans637](https://pollev.com/ciaranevans637) to respond.
+]
+
+
+.abox[
+(A) Between 0 and 1
+]
+
+.bbox[
+(B) Between 0 and $\infty$
+]
+
+.cbox[
+(C) Between $-\infty$ and $\infty$
+]
+
+.dbox[
+(D) Between 0 and 2
+]
+]
+
+---
+
+### Class activity, Part II
+
+.large[
+Spend a few minutes working in groups on Part II of the class activity (questions 4 -- 6)
+
+[https://sta214-f22.github.io/class_activities/ca_lecture1.html](https://sta214-f22.github.io/class_activities/ca_lecture1.html)
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+What range of values can the log odds take?
+]
+]
+
+---
+
+### Conceptual question
+
+.large[
+.question[
+If the *probability* of an event is $> 0.5$, what is true about the log odds? Go to [https://pollev.com/ciaranevans637](https://pollev.com/ciaranevans637) to respond.
+]
+
+.abox[
+(A) log odds $> 0$
+]
+
+.bbox[
+(B) log odds $> 1$
+]
+
+.cbox[
+(C) log odds $> 0.5$
+]
+
+.dbox[
+(D) log odds $< 0$
+]
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+True or false: if the log odds are an increasing function of $X$, then the probability is also an increasing function of $X$.
+]
+]
+
+---
+
+### Class activity
+
+.large[
+**Logistic regression:**
+.center[
+$\log \left( \dfrac{\pi}{1 - \pi} \right) = \beta_0 + \beta_1 \text{Age}$
+]
+
+.question[
+In general, why is it not appropriate to model the probability, or the odds, as a linear function of the predictor?
+]
+]
+
+---
+
+### Next steps
+
+.large[
+* We will spend the next few weeks talking in depth about logistic regression
+* Download R and RStudio today or tomorrow
+    - Instructions on course website
+    - Please come to office hours or contact me if you have problems!
+* Bring laptop to class
+* Friday: Lab 1
+]
+
+---
+
+### Semester plan
+
+.large[
+* Logistic regression
+* Multinomial regression
+* Poisson regression
+* Mixed effects
+* Parametric bootstrapping (time permitting)
+]
+
+---
+
+### Course prerequisites
+
+.large[
+Prerequisites:
+
+* STA 112 (previously numbered 212) and MTH 111 (Calculus I)
+* You may *not* take this class if you previously took STA 279 with me or Dr. Dalzell!
+
+I expect you to be familiar with:
+
+* EDA (Exploratory data analysis)
+* Linear regression with multiple predictors
+* Comparing and interpreting models
+* Confidence intervals and hypothesis tests
+* Basic R computing
+]
+
+---
+
+### Syllabus highlights
+
+.large[
+(please see the course website [https://sta214-s22.github.io/about/](https://sta214-s22.github.io/about/) for full details)
+
+* Syllabus may change if the public health situation and/or university policies change.
+* The course calendar is tentative, and dates are subject to change
+]
+
+---
+
+### Getting help
+
+.large[
+* Office hours 
+    - sign up for 15-minute time slots
+    - see course web page
+* Email (evansc@wfu.edu)
+]
+
+---
+
+### Diversity and Inclusion
+
+.large[
+In this class, we will embrace diversity of age, background, beliefs, ethnicity, gender, gender identity, gender expression, national origin, neurotype, race, religious affiliation, sexual orientation, and other visible and non-visible categories. The university and I do not tolerate discrimination.
+
+* Let me know ways to improve the effectiveness of the course for you personally, or for other students or student groups.
+* *Names/Pronouns:* You deserve to be addressed in the manner you prefer. To guarantee that I address you properly, you are welcome to tell me your pronoun(s) and/or preferred name at any time, either in person or via email.
+]
+
+---
+
+### Accessibility
+
+.large[
+If you require accommodations due to a disability or other learning differences, contact Learning Assistance Center & Disability Services at 336-758-5929 or lacds@wfu.edu as soon as possible to better ensure that such accommodations are implemented in a timely fashion. Please feel free
+to contact me, and I will be happy to discuss any necessary accommodations. I always like
+to know how to help my students feel comfortable and successful in our course.
+
+**Scent-free zone:** The 3rd floor of Manchester is a scent-free zone. Please refrain from wearing perfume, cologne, scented lotion, body spray, and all other scented products when visiting the 3rd floor.
+]
+
+---
+
+### Course components
+
+.large[
+| Component | Weight |
+| --------- | ------ |
+| Homework and Labs |  30%   |
+| Exam 1    |  10%   |
+| Exam 2    |  10%   |
+| Final Exam | 20% |
+| Project 1 |  15%   |
+| Project 2 |  15%   |
+]
+
+---
+
+### Extensions and late work
+
+.large[
+**Extensions:** You have a bank of **5** extension days, which you may use over the course of the semester. You may use either one or two days for a given assignment. *Additional extensions may be given, on an individual basis, in extenuating circumstances.*
+
+**Late work:** An assignment will be marked off 20% for every 24 hours it is late (past the original due date).
+
+If you know you cannot turn in an assignment (for instance, if you are ill or there is a family emergency), let me know before the assignment is due, and we will work something out. There will be no grade changes
+after our last day of class.
+]
