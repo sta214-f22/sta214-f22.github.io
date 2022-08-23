@@ -15,6 +15,7 @@ August 22
 
 August 24
 : Parametric models and logistic regression
+  : [Slides](https://sta214-f22.github.io/slides/lecture_2.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture2.html)
   
 : Textbook 3.3.1, 6.2
 

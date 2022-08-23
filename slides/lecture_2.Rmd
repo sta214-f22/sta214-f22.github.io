@@ -1,0 +1,449 @@
+---
+title: Parametric models and logistic regression
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+### Data
+
+.large[Information on 911 Indonesian husband-wife couples, with the wife aged between 20 and 35, and variables including:
+
+* Contraceptive method used (0 = none, 1 = some use)
+* Wife's age (in years)
+* Husband's age (in years)
+* Wife's education (1 = low, 2, 3, 4 = high)
+* Husband's education (1 = low, 2, 3, 4 = high)
+* Number of children ever born
+
+**Notation:** Let $Y$ = contraceptive use (0 or 1), and $Age$ = wife's age. Let $(Age_i, Y_i)$ be the observations for couple $i$ ( $i = 1,...,n$ )]
+
+---
+
+### Regression Modeling
+
+.large[
+
+**Goal:** The goal of a regression model is to describe the relationship between the predictor and the response.
+
+**Example:** linear regression
+
+.center[
+$Y_i = \beta_0 + \beta_1 Age_i + \varepsilon_i \hspace{1cm} \text{where } \hspace{0.5cm} \varepsilon_i \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+]
+
+.question[
+Here $Y_i = 0$ or $1$. Is a linear regression appropriate?
+]
+
+]
+
+---
+
+### Linear regression is not appropriate for binary data
+
+.center[
+```{r echo=F, message=F, warning=F, fig.width=7, fig.height=5}
+library(tidyverse)
+
+x <- seq(0, 2, 0.01)
+y <- rbinom(length(x), 1, exp(-6 + 6*x)/(1 + exp(-6 + 6*x)))
+
+data.frame(x = x, y = y) %>%
+  ggplot(aes(x = x, y = y)) +
+  geom_point(size=1.5) +
+  geom_smooth(method="lm", se=F) +
+  labs(x = "X", y = "Y") +
+  theme_bw() +
+  theme(text = element_text(size=20),
+        axis.ticks.x=element_blank(),
+        axis.text.x=element_blank())
+```
+]
+
+---
+
+### Revisiting the linear regression model
+
+---
+
+### Parametric modeling
+
+.large[
+
+A regression model is an example of a more general process called **parametric modeling**
+
+* **Step 1:** Choose a reasonable distribution for $Y_i$
+* **Step 2:** Build a model for the parameters of interest
+* **Step 3:** Fit the model
+
+]
+
+---
+
+### Step 1: Choose a reasonable distribution for $Y_i$
+
+.large[
+.question[
+What do I mean by a *distribution*?
+]
+]
+
+---
+
+### Step 1: Choose a reasonable distribution for $Y_i$
+
+.large[
+.question[
+What do I mean by a *distribution*?
+]
+]
+
+.large[
+* A **distribution** tells us what outcomes are possible for $Y_i$, and how often these outcomes occur.
+
+Here the possible values of $Y_i$ are 0 (no contraceptive use) and 1 (some use).
+
+.question[
+How often do these values occur in the population?
+]
+
+]
+
+---
+
+### Step 1: Choose a reasonable distribution for $Y_i$
+
+.large[
+.question[
+What do I mean by a *distribution*?
+]
+]
+
+.large[
+* A **distribution** tells us what outcomes are possible for $Y_i$, and how often these outcomes occur.
+
+Here the possible values of $Y_i$ are 0 (no contraceptive use) and 1 (some use).
+
+.question[
+How often do these values occur in the population?
+]
+
+]
+
+.large[
+* We don't know, so we will estimate from the sample
+* We assume the probability $Y_i = 1$ depends on $Age_i$
+]
+
+---
+
+### Step 1: Choose a reasonable distribution for $Y_i$
+
+
+---
+
+### Bernoulli distribution
+
+.large[
+**Definition:** Let $Y_i$ be a binary random variable, and $\pi_i = P(Y_i = 1)$. Then $Y_i \sim Bernoulli(\pi_i)$.
+
+.question[
+What do I mean by a *random variable*?
+]
+]
+
+---
+
+### Bernoulli distribution
+
+.large[
+**Definition:** Let $Y_i$ be a binary random variable, and $\pi_i = P(Y_i = 1)$. Then $Y_i \sim Bernoulli(\pi_i)$.
+
+.question[
+What do I mean by a *random variable*?
+]
+]
+
+.large[
+A **random variable** is an event that has a set of possible outcomes, but we don't know which one will occur
+
+* Here $Y_i = 0$ or $1$
+* Our goal is to use the observed data to estimate $\pi_i = P(Y_i = 1)$
+]
+
+---
+
+### Step 2: Build a model
+
+.large[
+* $Y_i =$ contraceptive use (0 = none, 1 = some)
+* $Y_i \sim Bernoulli(\pi_i)$
+* Our parameter is $\pi_i$, which we assume depends on $Age_i$. For a binary response, we will use a **logistic regression** model
+]
+
+
+---
+
+### Logistic regression model
+
+.large[
+
+$Y_i =$ contraceptive use (0 = none, 1 = some) 
+
+$Age_i =$ wife's age (in years)
+
+**Step 1:** $\hspace{1cm} Y_i \sim Bernoulli(\pi_i)$
+
+**Step 2:** $\hspace{1cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \ Age_i$
+
+.question[
+Why is there no noise term $\varepsilon_i$ in the logistic regression model? Discuss for 1--2 minutes with your neighbor, then we will discuss as a class.
+]
+]
+
+---
+
+### A note on parameters
+
+.large[
+$Y_i \sim Bernoulli(\pi_i) \hspace{1cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \ Age_i$
+
+* $\pi_i$: parameter for the distribution of $Y_i$. Depends on $Age_i$
+* $\beta_0, \beta_1$: parameters for the (unknown) relationship between $Age_i$ and $\pi_i$
+
+]
+
+---
+
+### Modeling $\pi_i$
+
+.large[
+$Y_i \sim Bernoulli(\pi_i) \hspace{1cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \ Age_i$
+
+.question[
+What if I want the model in terms of $\pi_i$, instead of the log odds?
+]
+
+]
+
+---
+
+### Shape of the regression curve
+
+.large[
+.pull-left[
+$\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \ X_i \hspace{0.5cm}$
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=6, fig.height=4}
+
+data.frame(x = seq(-5, 6, length.out=100),
+           y1 = -1 + seq(-5, 6, length.out=100)) %>%
+  ggplot(aes(x = x, y = y1)) +
+  geom_line(lwd = 2.5) +
+  theme_bw() +
+  labs(x = "x", y = "Log odds") +
+  theme(text = element_text(size = 30))
+```
+]
+
+.pull-right[
+$\pi_i = \dfrac{e^{\beta_0 + \beta_1 \ X_i}}{1 + e^{\beta_0 + \beta_1 \ X_i}}$
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=6, fig.height=4}
+
+expit <- function(p){
+  return(exp(p)/(1 + exp(p)))
+}
+
+data.frame(x = seq(-5, 6, length.out=100),
+           y1 = expit(-1 + seq(-5, 6, length.out=100))) %>%
+  ggplot(aes(x = x, y = y1)) +
+  geom_line(lwd = 2.5) +
+  theme_bw() +
+  labs(x = "x", y = "P(y = 1)") +
+  theme(text = element_text(size = 30))
+```
+]
+]
+
+---
+
+### Shape of the regression curve
+
+.large[
+How does the shape of the fitted logistic regression depend on $\beta_0$ and $\beta_1$?
+
+.pull-left[
+$\pi_i = \dfrac{\exp\{\beta_0 +  x_i \}}{1 + \exp\{\beta_0 + x_i \}} \hspace{0.5cm}$ for $\beta_0 = -3, -1, 1$
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=6, fig.height=4}
+
+expit <- function(p){
+  return(exp(p)/(1 + exp(p)))
+}
+
+data.frame(x = seq(-5, 6, length.out=100),
+           y1 = expit(-1 + seq(-5, 6, length.out=100)),
+           y2 = expit(-3 + seq(-5, 6, length.out=100)),
+           y3 = expit(1 + seq(-5, 6, length.out=100))) %>%
+  ggplot(aes(x = x, y = y1)) +
+  geom_line(lwd = 2.5) +
+  geom_line(aes(y = y2), lwd=2.5, lty = 2, color="blue") +
+  geom_line(aes(y = y3), lwd=2.5, lty = 3, color="red") +
+  theme_bw() +
+  labs(x = "x", y = "P(y = 1)") +
+  annotate("text", x = -2, y = 0.4, label="1", size=8) +
+  annotate("text", x = 0, y = 0.4, label="-1", size=9) +
+  annotate("text", x = 3.5, y = 0.4, label="-3", size=8) +
+  theme(text = element_text(size = 30))
+```
+]
+
+.pull-right[
+$\pi_i = \dfrac{\exp\{-1 +  \beta_1 \ x_i \}}{1 + \exp\{-1 +  \beta_1 \ x_i \}} \hspace{0.5cm}$ for $\beta_1 = 0.5, 1, 2$
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=6, fig.height=4}
+
+data.frame(x = seq(-5, 6, length.out=100),
+           y1 = expit(-1 + 0.5*seq(-5, 6, length.out=100)),
+           y2 = expit(-1 + seq(-5, 6, length.out=100)),
+           y3 = expit(-1 + 2*seq(-5, 6, length.out=100))) %>%
+  ggplot(aes(x = x, y = y1)) +
+  geom_line(lwd = 2.5) +
+  geom_line(aes(y = y2), lwd=2.5, lty = 2, color="blue") +
+  geom_line(aes(y = y3), lwd=2.5, lty = 3, color="red") +
+  theme_bw() +
+  labs(x = "x", y = "P(y = 1)") +
+  annotate("text", x = 3, y = 0.75, label="0.5", size=8) +
+  annotate("text", x = 1.5, y = 0.75, label="1", size=9) +
+  annotate("text", x = 0.5, y = 0.75, label="2", size=8) +
+  theme(text = element_text(size = 30))
+```
+]
+]
+
+---
+
+### Parametric modeling
+
+.large[
+
+$Y_i =$ contraceptive use (0 = none, 1 = some) 
+
+$Age_i =$ wife's age (in years)
+
+**Step 1:** $\hspace{1cm} Y_i \sim Bernoulli(\pi_i)$
+
+**Step 2:** $\hspace{1cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \ Age_i$
+
+**Step 3:** Fitting the model
+
+.center[
+$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = -0.976 + 0.052 \ Age_i$
+]
+]
+
+---
+
+### Class Activity, Part I
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture2.html](https://sta214-f22.github.io/class_activities/ca_lecture2.html)
+
+* Spend 5--7 minutes working in pairs on questions 1 -- 5
+* Solutions are provided for 1 -- 3
+* We will discuss 4 and 5 as a class
+]
+
+---
+
+### Class Activity
+
+.large[
+.question[
+What is the predicted probability of contraception use if the wife is 30 years old?
+]
+]
+
+---
+
+### Class Activity
+
+.large[
+.question[
+Suppose that researchers want to follow up with couples for whom the probability of contraception use is less than 60%. Which age range should they target?
+]
+]
+
+---
+
+### Class Activity, Part II
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture2.html](https://sta214-f22.github.io/class_activities/ca_lecture2.html)
+
+* Spend 3--5 minutes working in pairs on questions 6 -- 8
+* Solutions are provided for 6 and 7
+* We will discuss 8 as a class
+]
+
+---
+
+### Interpretation
+
+.large[
+**Fitted model: log odds form**
+
+.center[
+$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = -0.976 + 0.052 \ Age_i$
+]
+
+* *Interpretation:* For every one-year increase in age, we predict that the log odds of contraception use increase by 0.052
+]
+
+---
+
+### Interpretation
+
+.large[
+**Fitted model: log odds form**
+
+.center[
+$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = -0.976 + 0.052 \ Age_i$
+]
+
+* *Interpretation:* For every one-year increase in age, we predict that the log odds of contraception use increase by 0.052
+]
+
+.large[
+**Fitted model: odds form**
+
+.center[
+$\dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} = e^{-0.976 + 0.052 \ Age_i} = e^{-0.976}e^{0.052 \ Age_i}$
+]
+]
+
+.large[
+* *Interpretation:* For every one-year increase in age, we predict that the odds of contraception use get multiplied by $e^{0.052} = 1.053$
+]
+
+---
+
+### Comparing linear and logistic regression
+
+.large[
+* We built the logistic regression model using steps for building a parametric model
+* We can use the same steps for linear regression:
+  * **Step 1:** $Y_i \sim N(\mu_i, \sigma^2)$
+  * **Step 2:** $\mu_i = \beta_0 + \beta_1 X_i$
+* Choosing logistic vs. linear regression depends on the distribution of $Y_i$
+  * As we move through the course, we will see other distributions for $Y_i$ too
+]

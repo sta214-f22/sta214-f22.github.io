@@ -1,0 +1,85 @@
+---
+title: "Class Activity, August 24"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+In this activity, we will work with the fitted logistic regression model from the contraception survey data. The logistic regression model is 
+
+$Y_i \sim Bernoulli(\pi_i)$,
+
+$\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \ Age_i$
+
+where $Y_i =$ contraceptive use (0 = no, 1 = yes) and $Age_i =$ the wife's age (in years).
+
+The fitted model is $\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = -0.976 + 0.052 \ Age_i$.
+
+# Part I: using the fitted model
+
+1. Does the probability of contraception use increase or decrease with age?
+
+<SCRIPT>
+function ShowAndHide(divid) {
+    var x = document.getElementById(divid);
+    if (x.style.display == 'none') {
+        x.style.display = 'block';
+    } else {
+        x.style.display = 'none';
+    }
+}
+</SCRIPT>
+
+<BUTTON ONCLICK="ShowAndHide('q1_solution')">Solution</BUTTON>
+
+<DIV ID="q1_solution" STYLE="display:none">
+The slope of the fitted model (0.052) is positive, which means that the log odds increase as age increases. Therefore the probability also increases as age increases.
+</DIV>
+
+2. What is the predicted odds of contraception use if the wife is 30 years old?
+
+<BUTTON ONCLICK="ShowAndHide('q2_solution')">Solution</BUTTON>
+
+<DIV ID="q2_solution" STYLE="display:none">
+The predicted odds are $\exp\{ -0.976 + 0.052 \cdot 30 \} = 1.793$
+</DIV>
+
+3. Based on your answer to question 2, is the predicted *probability* of contraception use $> 0.5$, $< 0.5$, or $= 0.5$? (You should answer this without performing any calculations).
+
+<BUTTON ONCLICK="ShowAndHide('q3_solution')">Solution</BUTTON>
+
+<DIV ID="q3_solution" STYLE="display:none">
+Remember that the probability is > 0.5 when the odds are > 1. Since the odds here are 1.793, the predicted probability is > 0.5.
+</DIV>
+
+4. Now calculate the predicted probability of contraception use if the wife is 30 years old.
+
+5. Suppose that researchers want to follow up with couples for whom the probability of contraception use is less than 60%. Which age range should they target?
+
+## Part II: interpretation
+
+As we will see, we often interpret logistic regression in terms of odds and odds ratios.
+
+6. What are the predicted odds if the wife is 31 years old?
+
+<BUTTON ONCLICK="ShowAndHide('q6_solution')">Solution</BUTTON>
+
+<DIV ID="q6_solution" STYLE="display:none">
+The predicted odds are $\exp\{ -0.976 + 0.052 \cdot 31 \} = 1.889$
+</DIV>
+
+One way to compare odds is with the **odds ratio**. Here, the odds ratio is $\dfrac{1.889}{1.793} = 1.053$, which means that the odds of contraception use are 1.053 times higher for a couple where the wife is 31 years old, compared to a couple where the wife is 30 years old.
+
+7. Calculate the odds ratio for contraception use for a couple where the wife is 21 years old, compared to a couple where the wife is 20 years old.
+
+<BUTTON ONCLICK="ShowAndHide('q7_solution')">Solution</BUTTON>
+
+<DIV ID="q7_solution" STYLE="display:none">
+The odds ratio is $\dfrac{\exp\{ -0.976 + 0.052 \cdot 21 \}}{\exp\{ -0.976 + 0.052 \cdot 20 \}} = 1.053$
+</DIV>
+
+8. The slope of the fitted logistic regression line is 0.052. Compare $e^{0.052}$ to your answers in 6 and 7.
+
