@@ -1,0 +1,74 @@
+---
+title: Lab 1
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+## Agenda
+
+.large[
+* Lab 1: R refresher
+  * Due Friday, September 2 at 12:00pm (noon) on Canvas
+]
+
+---
+
+### Course components
+
+.large[
+| Component | Weight |
+| --------- | ------ |
+| Homework and Labs |  30%   |
+| Exam 1    |  10%   |
+| Exam 2    |  10%   |
+| Final Exam | 20% |
+| Project 1 |  15%   |
+| Project 2 |  15%   |
+]
+
+---
+
+### Extensions and late work
+
+.large[
+**Extensions:** You have a bank of **5** extension days, which you may use over the course of the semester. You may use either one or two days for a given assignment. *Additional extensions may be given, on an individual basis, in extenuating circumstances.*
+
+**Late work:** An assignment will be marked off 20% for every 24 hours it is late (past the original due date).
+
+If you know you cannot turn in an assignment (for instance, if you are ill or there is a family emergency), let me know before the assignment is due, and we will work something out. There will be no grade changes
+after our last day of class.
+]
+
+---
+
+### Getting help
+
+.large[
+* Office hours 
+  * Monday 3 - 4
+  * Wednesday 11 - 12
+  * Thursday 2 - 3
+  * sign up for 15-minute time slots
+  * see course web page
+* Email (evansc@wfu.edu)
+]
+
+---
+
+### Lab 1: Exploring grad school admissions data
+
+.large[
+[https://sta214-f22.github.io/labs/lab_1.html](https://sta214-f22.github.io/labs/lab_1.html)
+
+* Lab goal: review R and EDA
+* Welcome to work in groups
+* I will come around to answer any questions
+]

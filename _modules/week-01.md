@@ -21,3 +21,4 @@ August 24
 
 August 26
 : **Lab**{: .label .label-purple } Lab 1
+  : [Slides](https://sta214-f22.github.io/slides/lecture_3.pdf), [Lab 1](https://sta214-f22.github.io/labs/lab_1.html)
