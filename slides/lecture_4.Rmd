@@ -1,0 +1,227 @@
+---
+title: Logistic regression interpretation
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=F}
+grad_app <- read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
+
+library(knitr)
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+   lines <- options$output.lines
+   if (is.null(lines)) {
+     return(hook_output(x, options))  # pass to default hook
+   }
+   x <- unlist(strsplit(x, "\n"))
+   more <- "..."
+   if (length(lines)==1) {        # first n lines
+     if (length(x) > lines) {
+       # truncate the output, but add ....
+       x <- c(head(x, lines), more)
+     }
+   } else {
+     x <- c(more, x[lines], more)
+   }
+   # paste these lines together
+   x <- paste(c(x, ""), collapse = "\n")
+   hook_output(x, options)
+ })
+```
+
+### Class activity, Part I
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture4.html](https://sta214-f22.github.io/class_activities/ca_lecture4.html)
+]
+
+---
+
+### Class activity
+
+.large[
+$$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = -2.901 + 0.0036 \ Score_i$$
+
+.question[
+Calculate the odds ratio comparing odds of acceptance for a student with a GRE score of 701 to a student with a GRE score of 700.
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = -2.901 + 0.0036 \ Score_i$$
+
+.question[
+Calculate the odds ratio comparing odds of acceptance for a student with a GRE score of 701 to a student with a GRE score of 700.
+]
+]
+
+.large[
+$$\dfrac{e^{-2.901 + 0.0036 \cdot 701}}{e^{-2.901 + 0.0036 \cdot 700}} = 1.0036$$
+
+.question[
+This is the same odds ratio as comparing a 601 GRE to a 600 GRE!
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = -2.901 + 0.0036 \ Score_i$$
+
+Odds ratio for increasing GRE by one point:
+
+]
+
+---
+
+### Interpreting coefficients
+
+.large[
+$$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = \widehat{\beta}_0 + \widehat{\beta}_1 x_i$$
+
+Interpretation of $\widehat{\beta}_1$ :
+
+* A one unit increase in $x$ is associated with an increase of $\widehat{\beta}_1$ in the log odds
+* A one unit increase in $x$ is associated with an increase in the odds by a factor of $\exp\{\widehat{\beta}_1\}$
+
+.question[
+How do you think we interpret $\widehat{\beta}_0$?
+]
+]
+
+---
+
+### Interpreting coefficients
+
+.large[
+$$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = \widehat{\beta}_0 + \widehat{\beta}_1 x_i$$
+
+Interpretation of $\widehat{\beta}_1$ :
+
+* A one unit increase in $x$ is associated with an increase of $\widehat{\beta}_1$ in the log odds
+* A one unit increase in $x$ is associated with an increase in the odds by a factor of $\exp\{\widehat{\beta}_1\}$
+
+Interpretation of $\widehat{\beta}_0$ :
+
+* The estimated log odds when $x = 0$ are $\widehat{\beta}_0$
+* The estimated odds when $x = 0$ are $\exp\{\widehat{\beta}_0\}$
+]
+
+---
+
+### Fitting logistic regression in R
+
+.large[
+```{r output.lines = 10:22}
+gre_glm <- glm(admit ~ gre, data = grad_app,
+               family = binomial)
+summary(gre_glm)
+```
+]
+
+---
+
+### Class activity, Part II
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture4.html](https://sta214-f22.github.io/class_activities/ca_lecture4.html)
+]
+
+---
+
+### Class activity
+
+.large[
+$$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = -4.358 + 1.051 \ GPA_i$$
+
+.question[
+What is the change in the odds of acceptance associated with an increase of 1 point in GPA?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = -4.358 + 1.051 \ GPA_i$$
+
+.question[
+What is the change in the odds of acceptance associated with an increase of 1 point in GPA?
+]
+]
+
+.large[
+An increase of 1 point in GPA is associated with an increase in the odds of acceptance by a factor of $\exp\{1.051\} = 2.861$
+]
+
+---
+
+### Class activity
+
+.large[
+$$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = -4.358 + 1.051 \ GPA_i$$
+
+.question[
+What is the estimated probability that a student with a GPA of 3.5 is accepted?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = -4.358 + 1.051 \ GPA_i$$
+
+.question[
+What is the estimated probability that a student with a GPA of 3.5 is accepted?
+]
+]
+
+.large[
+$\dfrac{e^{-4.358 + 1.051(3.5)}}{1 + e^{-4.358 + 1.051(3.5)}} \approx 0.336$
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+The logistic regression model assumes that the change in odds associated with an increase of 1 point in GPA is constant. Is the change in *probability* also constant?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+The logistic regression model assumes that the change in odds associated with an increase of 1 point in GPA is constant. Is the change in *probability* also constant?
+]
+]
+
+.large[
+No:
+
+* GPA = 2.0, estimated probability = 0.095
+* GPA = 3.0, estimated probability = 0.231
+* GPA = 4.0, estimated probability = 0.462
+]

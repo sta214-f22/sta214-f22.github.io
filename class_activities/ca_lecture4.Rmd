@@ -1,0 +1,98 @@
+---
+title: "Class Activity, August 29"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+In this class activity, we will continue working with the grad admissions data. You can load the grad admissions data into R with the following command:
+
+```r
+grad_app <- read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
+```
+
+Recall that this data contains information on 400 undergraduates who have applied to graduate school, and the outcome of their applications. The variables include:
+
+* *admit*: whether or not the student was admitted (0 = no, 1 = yes)
+* *gre*: the student’s score on the GRE (graduate record exam)
+* *gpa*: the student’s grade point average
+* *rank*: how prestigious the student’s undergraduate institution is (1 = most prestigious, 2, 3, 4 = least prestigious)
+
+## Part I
+
+Let's begin by looking at the relationship between GRE score and grad school acceptance. 
+
+1. Write down the logistic regression model for the relationship between GRE score and grad school acceptance. Remember to define your notation, and include both pieces of the model (the distribution of the response, and the relationship between the probability of acceptance and GRE score).
+
+<SCRIPT>
+function ShowAndHide(divid) {
+    var x = document.getElementById(divid);
+    if (x.style.display == 'none') {
+        x.style.display = 'block';
+    } else {
+        x.style.display = 'none';
+    }
+}
+</SCRIPT>
+
+<BUTTON ONCLICK="ShowAndHide('q1_solution')">Solution</BUTTON>
+
+<DIV ID="q1_solution" STYLE="display:none">
+Let $Y_i$ be the outcome of the $i$th student's grad applications, and $\pi_i = P(Y_i = 1)$. Let $Score_i$ be the $i$th student's GRE score. Our logistic regression model is
+
+$Y_i \sim Bernoulli(\pi_i)$
+
+$\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 Score_i$
+</DIV>
+
+The equation of the fitted logistic regression model is
+
+$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = -2.901 + 0.0036 \ Score_i$
+
+2. Is there a positive or negative relationship between GRE score and the probability of acceptance?
+
+<BUTTON ONCLICK="ShowAndHide('q2_solution')">Solution</BUTTON>
+
+<DIV ID="q2_solution" STYLE="display:none">
+The estimated slope of the logistic regression model (0.0036) is positive, so there is a positive relationship between GRE score and the probability of acceptance.
+</DIV>
+
+3. What is the estimated odds of acceptance for a student with a GRE score of 600?
+
+<BUTTON ONCLICK="ShowAndHide('q3_solution')">Solution</BUTTON>
+
+<DIV ID="q3_solution" STYLE="display:none">
+$e^{-2.901 + 0.0036 \cdot 600} \approx 0.47664$
+</DIV>
+
+4. What is the estimated odds of acceptance for a student with a GRE score of 601?
+
+<BUTTON ONCLICK="ShowAndHide('q4_solution')">Solution</BUTTON>
+
+<DIV ID="q4_solution" STYLE="display:none">
+$e^{-2.901 + 0.0036 \cdot 601} \approx 0.47836$
+</DIV>
+
+One way to compare odds is with the **odds ratio**. Here, the odds ratio is $\dfrac{e^{-2.901 + 0.0036 \cdot 601}}{e^{-2.901 + 0.0036 \cdot 600}} = 1.0036$, which means the odds of acceptance is 1.0036 times higher for a student with a GRE score of 601, compared to a student with a GRE score of 600.
+
+5. Calculate the odds ratio comparing odds of acceptance for a student with a GRE score of 701 to a student with a GRE score of 700.
+
+## Part II
+
+6. Run the following code to fit a logistic regression model with GPA score as the predictor and acceptance as the response:
+
+```r
+gpa_glm <- glm(admit ~ gpa, data = grad_app, 
+               family = binomial)
+summary(gpa_glm)
+```
+
+7. What is the change in the odds of acceptance associated with an increase of 1 point in GPA?
+
+8. What is the estimated probability that a student with a GPA of 3.5 is accepted?
+
+9. The logistic regression model assumes that the change in odds associated with an increase of 1 point in GPA is constant (as in Exercise 7). Is the change in *probability* also constant?
+

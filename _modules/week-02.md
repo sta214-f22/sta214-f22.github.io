@@ -3,7 +3,8 @@ title: Interpretation, assumptions, and likelihoods
 ---
 
 August 29
-: Interpretation and assumptions
+: Interpretation
+  : [Slides](https://sta214-f22.github.io/slides/lecture_4.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture4.html)
   
 : Textbook 6.4
 
