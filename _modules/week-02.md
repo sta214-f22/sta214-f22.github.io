@@ -11,6 +11,7 @@ August 29
 
 August 31
 : Parameter estimation
+  : [Slides](https://sta214-f22.github.io/slides/lecture_5.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture_5.html)
   
 : Textbook 2.4
 
