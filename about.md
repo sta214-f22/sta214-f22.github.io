@@ -73,6 +73,8 @@ Times:
 * Wednesday 11:00am -- 12:00pm
 * Thursday 2:00pm -- 3:00pm
 
+**Study session:** There is an additional study session led by our TA, from 7--8pm on Wednesday evenings in Kirby 120.
+
 
 ## Course policies
 
