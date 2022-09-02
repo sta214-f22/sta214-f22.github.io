@@ -18,9 +18,12 @@ August 31
 September 2
 
 : Maximum likelihood estimation
+
+  : [Slides](https://sta214-f22.github.io/slides/lecture_6.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture_6.html)
   
 : Textbook 2.4
 
 : **Lab 1 due**{: .label .label-red }
 
 : **HW 1 released**{: .label .label-yellow }
+  : [HW 1](https://sta214-f22.github.io/homework/homework_1.html)

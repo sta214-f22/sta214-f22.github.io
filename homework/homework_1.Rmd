@@ -1,0 +1,101 @@
+---
+title: "Homework 1"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+library(nycflights13)
+library(tidyverse)
+```
+
+**Due:** Friday, September 9, 12:00pm (noon) on Canvas
+
+**Submission:** If you would like to type your work in RMarkdown, a template file is provided ([hw_01_template.Rmd](https://sta214-f22.github.io/homework/hw_01_template.Rmd)). Alternatively, you may use LaTeX and submit the pdf, or write your work on paper and submit a scan on Canvas.
+
+# Part I: Interpreting logistic regression
+
+A company is trying to determine if individuals aged 18-24 tend to choose vacation rentals differently than other age groups. Specifically, we want to know if 18-24 year olds are more likely to use Airbnb or VRBO rentals than other age groups.
+To explore this, the company collects data on a random sample of 3000 individuals from from North Carolina. Each person is asked their age, and whether they are more likely to search for a traditional hotel room or an airbnb/VRBO first when considering where to stay on vacation.
+Based on this set up, complete the following problems. You are required to show your work for all questions.
+
+Let $Y_i = 0$ if individual $i$ in the survey states that they look for an airbnb/VRBO first, and $Y_i = 1$ if they look for a traditional hotel room first.
+
+Let $X_i = 1$ if individual i is between the ages of 18-24 and $X_i = 0$ otherwise.
+
+:::{.question}
+#### Question 1
+
+Suppose you are asked to build a parametric model to explore the relationship between $Y$ and $X$. Complete the first two steps of the process (a distribution for the response, and a model for the parameters).
+:::
+
+We fit the model in R, and obtain
+
+$\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) = 0.95 - 0.61 \ X_i$
+
+:::{.question}
+#### Question 2
+
+Interpret the slope of the fitted regression line in terms of the log odds. (Keep in mind that the predictor $X_i$ is binary in this example)
+:::
+
+:::{.question}
+#### Question 3
+
+Interpret the slope of the fitted regression line in terms of the odds. (Keep in mind that the predictor $X_i$ is binary in this example)
+:::
+
+:::{.question}
+#### Question 4
+
+Interpret the intercept of the fitted regression line in the context of the data. (Keep in mind that the predictor $X_i$ is binary in this example)
+:::
+
+:::{.question}
+#### Question 5
+
+Based on our results, what is the predicted probability that an individual age 19 would choose to search for an airbnb/VRBO first (rather than a traditional hotel room)? Round your answer to three decimal places.
+:::
+
+# Part II: Practice with maximum likelihood estimation
+
+(Note that this part is separate from the Airbnb/VRBO data you were working with above in Part I).
+
+Suppose that we have a variable $Y$ which can take values 1, 2, 3, 4, .... (i.e., any positive integer). The probability of each outcome does not depend on any explanatory variables. We are told that $P(Y_i = 1) = \pi_0$, and for each $y = 2, 3, 4, ...$ we are told that
+
+$P(Y_i = y) = (1 - \pi_0)^{y-1} \pi_0$
+
+We don't know $\pi_0$, but we observe data:
+
+1, 1, 3, 7, 2, 4, 3
+
+
+:::{.question}
+#### Question 6
+
+Your friend proposes $\widehat{\pi}_0 = 0.6$. Calculate the likelihood $L(0.6)$ using the observed sequence of data.
+
+:::
+
+:::{.question}
+#### Question 7
+
+You want to consider other possible estimates $\widehat{\pi}_0$. Write down the likelihood and log likelihood, $L(\widehat{\pi}_0)$, as a function of $\widehat{\pi}_0$, using the observed sequence of data.
+
+:::
+
+:::{.question}
+#### Question 8
+
+Calculate the maximum likelihood estimate $\widehat{\pi}_0$ from the observed data. You will:
+
+* Differentiate the log likelihood
+* Set the derivative equal to 0
+* Solve for $\widehat{\pi}_0$
+
+Make sure to show all your work.
+:::
