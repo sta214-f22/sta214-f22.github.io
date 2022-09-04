@@ -1,0 +1,430 @@
+---
+title: Likelihood and Deviance
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+### Recap
+
+.large[
+**Definition:** The *likelihood* $L(Model) = P(Data | Model)$ of a model is the probability of the observed data, given that we assume a certain model and certain values for the parameters that define that model.
+]
+
+.large[
+Coin example: flip a coin 5 times, with $\pi_i = P(Heads)$
+* Model: $Y_i \sim Bernoulli(\pi_i)$, and $\widehat{\pi}_i = 0.9$
+* Data: $y_1,...,y_5 = T, T, T, T, H$
+* Likelihood: $L(\widehat{\pi}_i) = P(y_1,...y_5 | \pi_i = 0.9) = 0.00009$
+]
+
+---
+
+### Recap
+
+.large[
+**Maximum likelihood estimation:** pick the parameter estimate that maximizes the likelihood.
+
+Coin example: flip a coin 5 times, with $\pi_i = P(Heads)$
+
+* Observed data: T, T, T, T, H
+* Likelihood: $L(\widehat{\pi}_i) = (1 - \widehat{\pi}_i)^4(\widehat{\pi}_i)$
+* Choose $\widehat{\pi}_i$ to maximize $L(\widehat{\pi}_i)$
+]
+
+---
+
+### Logistic regression
+
+.large[
+.center[
+$Y_i \sim Bernoulli(\pi_i) \hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 X_i$
+]
+]
+
+.large[
+Or in other words, 
+.center[
+$\pi_i = \dfrac{\exp\{\beta_0 + \beta_1 X_i\}}{1 + \exp\{\beta_0 + \beta_1 X_i\}}$
+]
+]
+
+.large[
+* To fit this model, we need to obtain estimates $\widehat{\beta}_0$ and $\widehat{\beta}_1$
+* Let's start by exploring the likelihood with this model
+]
+
+---
+
+### Logistic regression likelihood
+
+.large[
+.center[
+$Y_i \sim Bernoulli(\pi_i) \hspace{0.5cm} \pi_i = \dfrac{\exp\{\beta_0 + \beta_1 X_i\}}{1 + \exp\{\beta_0 + \beta_1 X_i\}}$
+]
+]
+
+.large[
+Data: $(X_1, Y_1),...,(X_n, Y_n)$
+
+Likelihood:
+]
+
+---
+
+### Logistic regression log likelihood
+
+.large[
+\begin{align}
+\log L(\beta_0, \beta_1) &= \sum \limits_{i=1}^n \left( Y_i \log(\pi_i) + (1 - Y_i) \log(1 - \pi_i) \right)
+\end{align}
+]
+
+---
+
+### Logistic regression log likelihood
+
+.large[
+\begin{align}
+\log L(\beta_0, \beta_1) &= \sum \limits_{i=1}^n Y_i \log \left( \dfrac{e^{\beta_0 + \beta_1 X_i}}{1 + e^{\beta_0 + \beta_1 X_i}} \right) + \\
+& \hspace{1cm} \sum \limits_{i=1}^n (1-Y_i) \log \left(1 - \dfrac{e^{\beta_0 + \beta_1 X_i}}{1 + e^{\beta_0 + \beta_1 X_i}} \right)
+\end{align}
+]
+
+.large[
+* Because we have two parameters, $\beta_0$ and $\beta_1$, the situation is more difficult
+* The math to find MLEs $\widehat{\beta}_0$ and $\widehat{\beta}_1$ is more complex than we will cover
+* R calculates $\widehat{\beta}_0$ and $\widehat{\beta}_1$ for us
+]
+
+---
+
+### Logistic regression in R
+
+.large[
+**Data:** Grad application data
+  * `admit`: accepted to grad school? (0 = no, 1 = yes)
+  * `gre`: GRE score
+  * `gpa`: undergrad GPA
+  * `rank`: prestige of undergrad institution
+  
+Let's fit a logistic regression model with GPA as the predictor.
+]
+
+---
+
+### Logistic regression in R
+
+.large[
+**Data:** Grad application data
+  * `admit`: accepted to grad school? (0 = no, 1 = yes)
+  * `gre`: GRE score
+  * `gpa`: undergrad GPA
+  * `rank`: prestige of undergrad institution
+  
+Let's fit a logistic regression model with GPA as the predictor.
+]
+
+.large[
+```r
+glm(admit ~ gpa, family = binomial, data = grad_app)
+```
+]
+
+---
+
+### Logistic regression in R
+
+```{r, include=F}
+grad_app <- read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
+```
+
+.large[
+```{r}
+glm(admit ~ gpa, family = binomial, data = grad_app)
+```
+
+.question[
+What are $\widehat{\beta}_0$ and $\widehat{\beta}_1$?
+]
+]
+
+---
+
+### Logistic regression in R
+
+```{r, include=F}
+library(knitr)
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+   lines <- options$output.lines
+   if (is.null(lines)) {
+     return(hook_output(x, options))  # pass to default hook
+   }
+   x <- unlist(strsplit(x, "\n"))
+   more <- "..."
+   if (length(lines)==1) {        # first n lines
+     if (length(x) > lines) {
+       # truncate the output, but add ....
+       x <- c(head(x, lines), more)
+     }
+   } else {
+     x <- c(more, x[lines], more)
+   }
+   # paste these lines together
+   x <- paste(c(x, ""), collapse = "\n")
+   hook_output(x, options)
+ })
+```
+
+.large[
+```{r, echo=F, output.lines = 8:10}
+glm(admit ~ gpa, family = binomial, data = grad_app)
+```
+
+* For linear regression, the bottom part of the output usually contains things like $R^2$ and $R^2_{adj}$ -- measures of how well the model fits the data.
+
+.question[
+What quantity have we been exploring that allows us to evaluate how well the model fits the data?
+]
+]
+
+---
+
+### Logistic regression in R
+
+.large[
+```{r, echo=F, output.lines = 8:10}
+glm(admit ~ gpa, family = binomial, data = grad_app)
+```
+
+* For linear regression, the bottom part of the output usually contains things like $R^2$ and $R^2_{adj}$ -- measures of how well the model fits the data.
+
+.question[
+Does R report the likelihood of the fitted model?
+]
+]
+
+---
+
+### Deviance
+
+.large[
+R reports the *deviance*, rather than the likelihood.
+
+**Deviance:**
+]
+
+---
+
+### Deviance
+
+.large[
+```{r, echo=F, output.lines = 8:10}
+glm(admit ~ gpa, family = binomial, data = grad_app)
+```
+
+Deviance $= -2 \log L = 487$
+]
+
+---
+
+### Class activity
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_7.html](https://sta214-f22.github.io/class_activities/ca_lecture_7.html)
+]
+
+---
+
+### Class activity: deviance
+
+.large[
+```{r, output.lines=8:10}
+glm(admit ~ gre, family = binomial, data = grad_app)
+```
+]
+
+.large[
+.question[
+What is the deviance of my fitted model?
+]
+]
+---
+
+### Class activity: deviance
+
+.large[
+```{r, output.lines=8:10}
+glm(admit ~ gre, family = binomial, data = grad_app)
+```
+]
+
+.large[
+.question[
+Which predictor (GRE or GPA) gives a model with a better fit?
+]
+]
+
+---
+
+### Class activity: deviance
+
+.large[
+```{r, output.lines=8:10}
+glm(admit ~ gre, family = binomial, data = grad_app)
+```
+]
+
+.large[
+.question[
+Which predictor (GRE or GPA) gives a model with a better fit?
+]
+]
+
+.large[
+GRE has a slightly smaller deviance (486.1 vs. 487), so GRE gives a slightly better fit.
+]
+
+---
+
+### Class activity: hypotheses
+
+.large[
+$Y_i \sim Bernoulli(\pi_i) \hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i$
+
+We want to know if there is actually a relationship between GRE score and grad school admission.
+
+.question[
+How can I express this as null and alternative hypotheses about one or more model parameters?
+]
+]
+
+---
+
+### Comparing deviances
+
+.large[
+```{r, echo=F, output.lines=17:19, highlight.output=c(3,4)}
+grad_glm <- glm(admit ~ gre, data = grad_app, 
+                family=binomial)
+summary(grad_glm)
+```
+
+499.98 = deviance for intercept-only model $\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0$ 
+
+486.06 = deviance for full model $\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i$
+]
+
+.large[
+**drop-in-deviance:** 
+]
+
+---
+
+### Comparing deviances
+
+.large[
+**drop-in-deviance:** $G =$ deviance for reduced model - deviance for full model = 13.92
+
+Full model: $\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i$ 
+
+* degrees of freedom: $df_{\text{full}} = n - p_{\text{full}} = 400 - 2 = 398$
+
+Reduced model: $\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0$
+
+* degrees of freedom: $df_{\text{reduced}} = n - p_{\text{reduced}} = 400 - 1 = 399$
+
+.question[
+Why is $G$ always $\geq 0$?
+]
+]
+
+---
+
+### Comparing deviances
+
+.large[
+**drop-in-deviance:** $G =$ deviance for reduced model - deviance for full model = 13.92
+
+Full model: $\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i$ 
+
+* $df_{\text{full}} = n - p_{\text{full}} = 400 - 2 = 398$
+
+Reduced model: $\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0$
+
+* $df_{\text{reduced}} = n - p_{\text{reduced}} = 400 - 1 = 399$
+
+$H_0: \beta_1 = 0 \hspace{1cm} H_A: \beta_1 \neq 0$
+
+.question[
+If $H_0$ is true, how unusual is $G = 13.92$?
+]
+]
+
+---
+
+### $\chi^2$ distribution
+
+.large[
+Under $H_0$, $G \sim \chi^2_{df_{\text{reduced}} - df_{\text{full}}}$
+
+$\chi^2_k$ distribution: parameterized by degrees of freedom $k$
+]
+
+.center[
+<img src="Chi-square_pdf.png" width="600">
+]
+
+
+---
+
+### Computing a p-value
+
+.large[
+$\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i$ 
+
+$H_0: \beta_1 = 0 \hspace{1cm} H_A: \beta_1 \neq 0$
+
+$G =$ deviance for reduced model - deviance for full model = 13.92 $\sim \chi^2_1$
+
+```{r}
+pchisq(13.92, df = 1, lower.tail=FALSE)
+```
+]
+
+---
+
+### Concept check
+
+.large[
+Our p-value is 0.0002. What is the most appropriate conclusion?
+
+.abox[
+(A) We reject the null hypothesis, since $p < 0.05$.
+]
+
+.bbox[
+(B) We fail to reject the null hypothesis, since $p < 0.05$.
+]
+
+.cbox[
+(C) The data provide strong evidence of a relationship between GRE score and the probability of admission to graduate school.
+]
+
+.dbox[
+(D) The data do not provide strong evidence of a relationship between GRE score and the probability of admission to graduate school.
+]
+]
+
+---
+
+### Likelihood ratio test for nested models
+

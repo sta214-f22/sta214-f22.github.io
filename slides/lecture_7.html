@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Likelihood and Deviance</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs-2.14/header-attrs.js"></script>
+    <link rel="stylesheet" href="lab-slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Likelihood and Deviance
+]
+
+---
+
+
+### Recap
+
+.large[
+**Definition:** The *likelihood* `\(L(Model) = P(Data | Model)\)` of a model is the probability of the observed data, given that we assume a certain model and certain values for the parameters that define that model.
+]
+
+.large[
+Coin example: flip a coin 5 times, with `\(\pi_i = P(Heads)\)`
+* Model: `\(Y_i \sim Bernoulli(\pi_i)\)`, and `\(\widehat{\pi}_i = 0.9\)`
+* Data: `\(y_1,...,y_5 = T, T, T, T, H\)`
+* Likelihood: `\(L(\widehat{\pi}_i) = P(y_1,...y_5 | \pi_i = 0.9) = 0.00009\)`
+]
+
+---
+
+### Recap
+
+.large[
+**Maximum likelihood estimation:** pick the parameter estimate that maximizes the likelihood.
+
+Coin example: flip a coin 5 times, with `\(\pi_i = P(Heads)\)`
+
+* Observed data: T, T, T, T, H
+* Likelihood: `\(L(\widehat{\pi}_i) = (1 - \widehat{\pi}_i)^4(\widehat{\pi}_i)\)`
+* Choose `\(\widehat{\pi}_i\)` to maximize `\(L(\widehat{\pi}_i)\)`
+]
+
+---
+
+### Logistic regression
+
+.large[
+.center[
+`\(Y_i \sim Bernoulli(\pi_i) \hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 X_i\)`
+]
+]
+
+.large[
+Or in other words, 
+.center[
+`\(\pi_i = \dfrac{\exp\{\beta_0 + \beta_1 X_i\}}{1 + \exp\{\beta_0 + \beta_1 X_i\}}\)`
+]
+]
+
+.large[
+* To fit this model, we need to obtain estimates `\(\widehat{\beta}_0\)` and `\(\widehat{\beta}_1\)`
+* Let's start by exploring the likelihood with this model
+]
+
+---
+
+### Logistic regression likelihood
+
+.large[
+.center[
+`\(Y_i \sim Bernoulli(\pi_i) \hspace{0.5cm} \pi_i = \dfrac{\exp\{\beta_0 + \beta_1 X_i\}}{1 + \exp\{\beta_0 + \beta_1 X_i\}}\)`
+]
+]
+
+.large[
+Data: `\((X_1, Y_1),...,(X_n, Y_n)\)`
+
+Likelihood:
+]
+
+---
+
+### Logistic regression log likelihood
+
+.large[
+`\begin{align}
+\log L(\beta_0, \beta_1) &amp;= \sum \limits_{i=1}^n \left( Y_i \log(\pi_i) + (1 - Y_i) \log(1 - \pi_i) \right)
+\end{align}`
+]
+
+---
+
+### Logistic regression log likelihood
+
+.large[
+`\begin{align}
+\log L(\beta_0, \beta_1) &amp;= \sum \limits_{i=1}^n Y_i \log \left( \dfrac{e^{\beta_0 + \beta_1 X_i}}{1 + e^{\beta_0 + \beta_1 X_i}} \right) + \\
+&amp; \hspace{1cm} \sum \limits_{i=1}^n (1-Y_i) \log \left(1 - \dfrac{e^{\beta_0 + \beta_1 X_i}}{1 + e^{\beta_0 + \beta_1 X_i}} \right)
+\end{align}`
+]
+
+.large[
+* Because we have two parameters, `\(\beta_0\)` and `\(\beta_1\)`, the situation is more difficult
+* The math to find MLEs `\(\widehat{\beta}_0\)` and `\(\widehat{\beta}_1\)` is more complex than we will cover
+* R calculates `\(\widehat{\beta}_0\)` and `\(\widehat{\beta}_1\)` for us
+]
+
+---
+
+### Logistic regression in R
+
+.large[
+**Data:** Grad application data
+  * `admit`: accepted to grad school? (0 = no, 1 = yes)
+  * `gre`: GRE score
+  * `gpa`: undergrad GPA
+  * `rank`: prestige of undergrad institution
+  
+Let's fit a logistic regression model with GPA as the predictor.
+]
+
+---
+
+### Logistic regression in R
+
+.large[
+**Data:** Grad application data
+  * `admit`: accepted to grad school? (0 = no, 1 = yes)
+  * `gre`: GRE score
+  * `gpa`: undergrad GPA
+  * `rank`: prestige of undergrad institution
+  
+Let's fit a logistic regression model with GPA as the predictor.
+]
+
+.large[
+```r
+glm(admit ~ gpa, family = binomial, data = grad_app)
+```
+]
+
+---
+
+### Logistic regression in R
+
+
+
+.large[
+
+```r
+glm(admit ~ gpa, family = binomial, data = grad_app)
+```
+
+```
+## 
+## Call:  glm(formula = admit ~ gpa, family = binomial, data = grad_app)
+## 
+## Coefficients:
+## (Intercept)          gpa  
+##      -4.358        1.051  
+## 
+## Degrees of Freedom: 399 Total (i.e. Null);  398 Residual
+## Null Deviance:	    500 
+## Residual Deviance: 487 	AIC: 491
+```
+
+.question[
+What are `\(\widehat{\beta}_0\)` and `\(\widehat{\beta}_1\)`?
+]
+]
+
+---
+
+### Logistic regression in R
+
+
+
+.large[
+
+```
+...
+## Degrees of Freedom: 399 Total (i.e. Null);  398 Residual
+## Null Deviance:	    500 
+## Residual Deviance: 487 	AIC: 491
+...
+```
+
+* For linear regression, the bottom part of the output usually contains things like `\(R^2\)` and `\(R^2_{adj}\)` -- measures of how well the model fits the data.
+
+.question[
+What quantity have we been exploring that allows us to evaluate how well the model fits the data?
+]
+]
+
+---
+
+### Logistic regression in R
+
+.large[
+
+```
+...
+## Degrees of Freedom: 399 Total (i.e. Null);  398 Residual
+## Null Deviance:	    500 
+## Residual Deviance: 487 	AIC: 491
+...
+```
+
+* For linear regression, the bottom part of the output usually contains things like `\(R^2\)` and `\(R^2_{adj}\)` -- measures of how well the model fits the data.
+
+.question[
+Does R report the likelihood of the fitted model?
+]
+]
+
+---
+
+### Deviance
+
+.large[
+R reports the *deviance*, rather than the likelihood.
+
+**Deviance:**
+]
+
+---
+
+### Deviance
+
+.large[
+
+```
+...
+## Degrees of Freedom: 399 Total (i.e. Null);  398 Residual
+## Null Deviance:	    500 
+## Residual Deviance: 487 	AIC: 491
+...
+```
+
+Deviance `\(= -2 \log L = 487\)`
+]
+
+---
+
+### Class activity
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_7.html](https://sta214-f22.github.io/class_activities/ca_lecture_7.html)
+]
+
+---
+
+### Class activity: deviance
+
+.large[
+
+```r
+glm(admit ~ gre, family = binomial, data = grad_app)
+```
+
+```
+...
+## Degrees of Freedom: 399 Total (i.e. Null);  398 Residual
+## Null Deviance:	    500 
+## Residual Deviance: 486.1 	AIC: 490.1
+...
+```
+]
+
+.large[
+.question[
+What is the deviance of my fitted model?
+]
+]
+---
+
+### Class activity: deviance
+
+.large[
+
+```r
+glm(admit ~ gre, family = binomial, data = grad_app)
+```
+
+```
+...
+## Degrees of Freedom: 399 Total (i.e. Null);  398 Residual
+## Null Deviance:	    500 
+## Residual Deviance: 486.1 	AIC: 490.1
+...
+```
+]
+
+.large[
+.question[
+Which predictor (GRE or GPA) gives a model with a better fit?
+]
+]
+
+---
+
+### Class activity: deviance
+
+.large[
+
+```r
+glm(admit ~ gre, family = binomial, data = grad_app)
+```
+
+```
+...
+## Degrees of Freedom: 399 Total (i.e. Null);  398 Residual
+## Null Deviance:	    500 
+## Residual Deviance: 486.1 	AIC: 490.1
+...
+```
+]
+
+.large[
+.question[
+Which predictor (GRE or GPA) gives a model with a better fit?
+]
+]
+
+.large[
+GRE has a slightly smaller deviance (486.1 vs. 487), so GRE gives a slightly better fit.
+]
+
+---
+
+### Class activity: hypotheses
+
+.large[
+`\(Y_i \sim Bernoulli(\pi_i) \hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i\)`
+
+We want to know if there is actually a relationship between GRE score and grad school admission.
+
+.question[
+How can I express this as null and alternative hypotheses about one or more model parameters?
+]
+]
+
+---
+
+### Comparing deviances
+
+.large[
+
+```
+...
+## 
+*##     Null deviance: 499.98  on 399  degrees of freedom
+*## Residual deviance: 486.06  on 398  degrees of freedom
+...
+```
+
+499.98 = deviance for intercept-only model `\(\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0\)` 
+
+486.06 = deviance for full model `\(\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i\)`
+]
+
+.large[
+**drop-in-deviance:** 
+]
+
+---
+
+### Comparing deviances
+
+.large[
+**drop-in-deviance:** `\(G =\)` deviance for reduced model - deviance for full model = 13.92
+
+Full model: `\(\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i\)` 
+
+* degrees of freedom: `\(df_{\text{full}} = n - p_{\text{full}} = 400 - 2 = 398\)`
+
+Reduced model: `\(\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0\)`
+
+* degrees of freedom: `\(df_{\text{reduced}} = n - p_{\text{reduced}} = 400 - 1 = 399\)`
+
+.question[
+Why is `\(G\)` always `\(\geq 0\)`?
+]
+]
+
+---
+
+### Comparing deviances
+
+.large[
+**drop-in-deviance:** `\(G =\)` deviance for reduced model - deviance for full model = 13.92
+
+Full model: `\(\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i\)` 
+
+* `\(df_{\text{full}} = n - p_{\text{full}} = 400 - 2 = 398\)`
+
+Reduced model: `\(\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0\)`
+
+* `\(df_{\text{reduced}} = n - p_{\text{reduced}} = 400 - 1 = 399\)`
+
+`\(H_0: \beta_1 = 0 \hspace{1cm} H_A: \beta_1 \neq 0\)`
+
+.question[
+If `\(H_0\)` is true, how unusual is `\(G = 13.92\)`?
+]
+]
+
+---
+
+### `\(\chi^2\)` distribution
+
+.large[
+Under `\(H_0\)`, `\(G \sim \chi^2_{df_{\text{reduced}} - df_{\text{full}}}\)`
+
+`\(\chi^2_k\)` distribution: parameterized by degrees of freedom `\(k\)`
+]
+
+.center[
+&lt;img src="Chi-square_pdf.png" width="600"&gt;
+]
+
+
+---
+
+### Computing a p-value
+
+.large[
+`\(\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i\)` 
+
+`\(H_0: \beta_1 = 0 \hspace{1cm} H_A: \beta_1 \neq 0\)`
+
+`\(G =\)` deviance for reduced model - deviance for full model = 13.92 `\(\sim \chi^2_1\)`
+
+
+```r
+pchisq(13.92, df = 1, lower.tail=FALSE)
+```
+
+```
+## [1] 0.0001907579
+```
+]
+
+---
+
+### Concept check
+
+.large[
+Our p-value is 0.0002. What is the most appropriate conclusion?
+
+.abox[
+(A) We reject the null hypothesis, since `\(p &lt; 0.05\)`.
+]
+
+.bbox[
+(B) We fail to reject the null hypothesis, since `\(p &lt; 0.05\)`.
+]
+
+.cbox[
+(C) The data provide strong evidence of a relationship between GRE score and the probability of admission to graduate school.
+]
+
+.dbox[
+(D) The data do not provide strong evidence of a relationship between GRE score and the probability of admission to graduate school.
+]
+]
+
+---
+
+### Likelihood ratio test for nested models
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
