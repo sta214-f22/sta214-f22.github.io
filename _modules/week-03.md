@@ -3,7 +3,8 @@ title: Logistic regression inference
 ---
 
 September 5
-: Logistic regression in R
+: Likelihood and Deviance
+  : [Slides](https://sta214-f22.github.io/slides/lecture_7.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture_7.html)
 
 September 7
 : Hypothesis tests and confidence intervals

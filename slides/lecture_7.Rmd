@@ -336,11 +336,7 @@ summary(grad_glm)
 
 Full model: $\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i$ 
 
-* degrees of freedom: $df_{\text{full}} = n - p_{\text{full}} = 400 - 2 = 398$
-
 Reduced model: $\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0$
-
-* degrees of freedom: $df_{\text{reduced}} = n - p_{\text{reduced}} = 400 - 1 = 399$
 
 .question[
 Why is $G$ always $\geq 0$?
@@ -356,11 +352,7 @@ Why is $G$ always $\geq 0$?
 
 Full model: $\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i$ 
 
-* $df_{\text{full}} = n - p_{\text{full}} = 400 - 2 = 398$
-
 Reduced model: $\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0$
-
-* $df_{\text{reduced}} = n - p_{\text{reduced}} = 400 - 1 = 399$
 
 $H_0: \beta_1 = 0 \hspace{1cm} H_A: \beta_1 \neq 0$
 
@@ -405,7 +397,9 @@ pchisq(13.92, df = 1, lower.tail=FALSE)
 ### Concept check
 
 .large[
-Our p-value is 0.0002. What is the most appropriate conclusion?
+.question[
+Our p-value is 0.0002. What is the most appropriate conclusion? Go to [https://pollev.com/ciaranevans637](https://pollev.com/ciaranevans637) to respond.
+]
 
 .abox[
 (A) We reject the null hypothesis, since $p < 0.05$.
