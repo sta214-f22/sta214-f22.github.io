@@ -1,0 +1,43 @@
+---
+title: "Class Activity, September 7"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+## Setup
+
+In this activity, you will work with data from a study on *dengue fever*, a mosquito-borne viral disease which infects hundreds of millions of people a year. This data was collected by researchers in Vietnam, who are interested in identifying the relationship between specific symptoms (white blood cell count, platelet count, vomiting, etc.) and the probability a patient at the hospital has dengue.
+
+The data contains informaton on 5720 Vietnamese children who were admitted to hospital with possible dengue fever. Variables include:
+
+* `Dengue`: whether the patient actually has dengue fever, based on a lab test (0 = no, 1 = yes)
+* `Temperature`: patient's body temperature (in Celsius)
+* `Abdominal`: whether the patient has abdominal pain (0 = no, 1 = yes)
+* `WBC`: patient's white blood cell count
+* `HCT`: patient's hematocrit (proportion of red blood cells)
+* `Age`: patient's age (in years)
+* `Sex`: patient's sex 
+* `+` several others
+
+To begin, we fit a logistic regression model to predict dengue status from white blood cell count (WBC). Here is the R output of the fitted model:
+
+```{r echo=F, message=F, warning=F}
+dengue <- read.csv("https://sta279-s22.github.io/labs/dengue.csv")
+```
+
+```{r}
+m1 <- glm(Dengue ~ WBC, family = binomial, data = dengue)
+summary(m1)
+```
+
+1. Researchers want to test whether there is any relationship between white blood cell count (WBC) and dengue status. Write the null and alternative hypotheses for this test, in terms of one or more model parameters.
+
+2. Test the hypotheses from question 1 using both a Wald test and a likelihood ratio test. *In practice, we would just do one test, rather than both of them. But since this is a class activity, I want you to try both tests.*
+
+3. Low white blood cell counts usually indicate an illness. Suppose the researchers now want to test whether patients with lower WBC are more likely to have dengue. Write the null and alternative hypotheses for this test, in terms of one or more model parameters.
+
+4. Which test (Wald, likelihood ratio, or both) can you use to test the hypotheses in question 2? Carry out the hypothesis test. *Hint: to calculate a p-value for a normal distribution, the `pnorm` function is useful. Use `pnorm(..., lower.tail=F)` for a right-tail alternative, and `pnorm(..., lower.tail=T)` for a left-tail alternative.*

@@ -1,0 +1,268 @@
+---
+title: Inference with logistic regression
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=F}
+library(knitr)
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+   lines <- options$output.lines
+   if (is.null(lines)) {
+     return(hook_output(x, options))  # pass to default hook
+   }
+   x <- unlist(strsplit(x, "\n"))
+   more <- "..."
+   if (length(lines)==1) {        # first n lines
+     if (length(x) > lines) {
+       # truncate the output, but add ....
+       x <- c(head(x, lines), more)
+     }
+   } else {
+     x <- c(more, x[lines], more)
+   }
+   # paste these lines together
+   x <- paste(c(x, ""), collapse = "\n")
+   hook_output(x, options)
+ })
+
+grad_app <- read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
+```
+
+### Last time: comparing deviances
+
+.large[
+Full model: $\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i$ 
+
+Reduced model: $\hspace{0.5cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0$
+
+$H_0: \beta_1 = 0 \hspace{1cm} H_A: \beta_1 \neq 0$
+
+**drop-in-deviance:** $G =$ deviance for reduced model - deviance for full model = 13.92
+
+.question[
+If $H_0$ is true, how unusual is $G = 13.92$?
+]
+]
+
+---
+
+### $\chi^2$ distribution
+
+.large[
+Under $H_0$, $G \sim \chi^2_{df_{\text{reduced}} - df_{\text{full}}}$
+
+$\chi^2_k$ distribution: parameterized by degrees of freedom $k$
+]
+
+.center[
+<img src="Chi-square_pdf.png" width="600">
+]
+
+
+---
+
+### Computing a p-value
+
+.large[
+$\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i$ 
+
+$H_0: \beta_1 = 0 \hspace{1cm} H_A: \beta_1 \neq 0$
+
+$G =$ deviance for reduced model - deviance for full model = 13.92 $\sim \chi^2_1$
+
+```{r}
+pchisq(13.92, df = 1, lower.tail=FALSE)
+```
+]
+
+---
+
+### Concept check
+
+.large[
+.question[
+Our p-value is 0.0002. What is the most appropriate conclusion? Go to [https://pollev.com/ciaranevans637](https://pollev.com/ciaranevans637) to respond.
+]
+
+.abox[
+(A) We reject the null hypothesis, since $p < 0.05$.
+]
+
+.bbox[
+(B) We fail to reject the null hypothesis, since $p < 0.05$.
+]
+
+.cbox[
+(C) The data provide strong evidence of a relationship between GRE score and the probability of admission to graduate school.
+]
+
+.dbox[
+(D) The data do not provide strong evidence of a relationship between GRE score and the probability of admission to graduate school.
+]
+]
+
+---
+
+### Likelihood ratio test for nested models
+
+---
+
+### Likelihood ratio test: strengths and weaknesses
+
+---
+
+### Alternative: Wald tests for single parameters
+
+.large[
+$\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i$ 
+
+**Hypotheses:**
+
+<br/>
+
+**Test statistic:**
+
+$z =$
+]
+
+---
+
+### Example
+
+.large[
+$\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \text{GRE}_i$ 
+
+$H_0: \beta_1 = 0 \hspace{1cm} H_A: \beta_1 \neq 0$
+
+```{r, echo=F, output.lines=10:14, highlight.output=c(4)}
+grad_glm <- glm(admit ~ gre, data = grad_app, family = binomial)
+summary(grad_glm)
+```
+
+$z =$
+]
+
+---
+
+### Wald tests vs. likelihood ratio tests
+
+.large[
+.pull-left[
+**Wald test**
+
+* like t-tests
+* test a single parameter
+* some example hypotheses:
+    * $H_0: \beta_1 = 0$ vs. $H_A: \beta_1 \neq 0$
+    * $H_0: \beta_1 = 1$ vs. $H_A: \beta_1 > 1$
+]
+
+.pull-right[
+**Likelihood ratio test**
+
+* like nested F-tests
+* test one or more parameters 
+* some example hypotheses:
+    * $H_0: \beta_1 = 0$ vs. $H_A: \beta_1 \neq 0$
+]
+
+p-values are different, because test statistics and distributions are different
+]
+
+---
+
+### Class activity
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_8.html](https://sta214-f22.github.io/class_activities/ca_lecture_8.html)
+]
+
+---
+
+### Class activity
+
+.large[
+$Y_i =$ dengue status (0 = no, 1 = yes)
+
+$$Y_i \sim Bernoulli(\pi_i) \hspace{1cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 WBC_i$$
+
+.question[
+Researchers want to test whether there is any relationship between WBC and dengue status. What are $H_0$ and $H_A$?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+```{r echo=F, message=F, warning=F, output.lines=10:19}
+dengue <- read.csv("https://sta279-s22.github.io/labs/dengue.csv")
+m1 <- glm(Dengue ~ WBC, family = binomial, data = dengue)
+summary(m1)
+```
+]
+
+.large[
+**Wald test:**
+
+]
+
+---
+
+### Class activity
+
+.large[
+```{r echo=F, message=F, warning=F, output.lines=10:19}
+dengue <- read.csv("https://sta279-s22.github.io/labs/dengue.csv")
+m1 <- glm(Dengue ~ WBC, family = binomial, data = dengue)
+summary(m1)
+```
+]
+
+.large[
+**Likelihood ratio test:**
+
+]
+
+---
+
+### Class activity
+
+.large[
+$Y_i =$ dengue status (0 = no, 1 = yes)
+
+$$Y_i \sim Bernoulli(\pi_i) \hspace{1cm} \log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 WBC_i$$
+
+.question[
+Researchers want to test whether patients with lower WBC are more likely to have dengue. What are $H_0$ and $H_A$?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+```{r echo=F, message=F, warning=F, output.lines=10:19}
+dengue <- read.csv("https://sta279-s22.github.io/labs/dengue.csv")
+m1 <- glm(Dengue ~ WBC, family = binomial, data = dengue)
+summary(m1)
+```
+]
+
+.large[
+**Test:**
+
+]
+

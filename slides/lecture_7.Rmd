@@ -421,4 +421,3 @@ Our p-value is 0.0002. What is the most appropriate conclusion? Go to [https://p
 ---
 
 ### Likelihood ratio test for nested models
-
