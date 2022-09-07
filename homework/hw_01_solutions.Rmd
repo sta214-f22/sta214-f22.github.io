@@ -1,0 +1,70 @@
+---
+title: "HW 1 Solutions"
+output: html_document
+---
+
+Total: 23 pts
+
+## Question 1 (4 pts)
+
+$$Y_i \sim Bernoulli(\pi_i)$$
+
+$$log \left( \frac{\pi_i}{1-\pi_i}  \right) = \beta_0 + \beta_1 X_i$$
+
+**Grading:**
+
+* Take off a point if the subscripts are not correct. 
+* Take off a point if they do not include the distribution for Y. 
+* NO points if they use LSLR regression. 
+
+## Question 2 (2 pts)
+
+If an individual is age 18-24, we predict the log odds of choosing a traditional hotel first will decrease by .61 (versus someone outside of that range - this part is optional)
+
+**Grading:** Take off 1 point if they interpret in terms of increasing age by one year
+
+
+## Question 3 (2 pts)
+
+If an individual is age 18-24, we predict the odds of choosing a traditional hotel first will decrease by a multiplier/factor of .54, or by 46% (versus someone outside of that range - this part is optional)
+
+**Grading:** Take off 1 point if they interpret in terms of increasing age by one year
+
+
+## Question 4 (2 pts)
+
+If an individual is not age 18-24, we predict the log odds of choosing a hotel first is .95.
+
+**Grading:** Take off 1 point if they interpret in terms of Age = 0
+
+## Question 5 (3 pts)
+
+$$\hat{\pi_i} = \frac{e^{.95 -.61(1)}}{1 + e^{.95 -.61(1)}} = .584 \Rightarrow  1 - \hat{\pi}_i = .416$$
+**Grading:** Take off a point if they plug in $X_i = 19$ instead of $X_i = 1$
+
+## Question 6 (2 pts)
+
+$L(0.6) = (0.6)^7(1 - 0.6)^{14} = 7.51 \times 10^{-8}$
+
+
+## Question 7 (2 pts)
+
+$L(\widehat{\pi}_0) = (\widehat{\pi}_0)^7 (1 - \widehat{\pi}_0)^{14}$
+
+$\log L(\widehat{\pi}_0) = 7 \log (\widehat{\pi}_0) + 14 \log (\widehat{\pi}_0)$
+
+
+## Question 8 (6 pts)
+
+$\dfrac{d}{d \widehat{\pi}_0} \log L(\widehat{\pi}_0) = \dfrac{7}{\widehat{\pi}_0} - \dfrac{14}{1 - \widehat{\pi}_0} = 0$
+
+$\dfrac{7}{\widehat{\pi}_0} = \dfrac{14}{1 - \widehat{\pi}_0}$
+
+$\dfrac{1 - \widehat{\pi}_0}{\widehat{\pi}_0} = 2$
+
+$\dfrac{1}{\widehat{\pi}_0} = 3$
+
+$\widehat{\pi}_0 = \dfrac{1}{3}$
+
+
+**Grading:** 3 pts for derivative, 3 pts for solving for $\widehat{\pi}_0$. They have to show their work here.
