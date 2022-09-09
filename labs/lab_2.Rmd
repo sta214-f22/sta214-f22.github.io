@@ -1,0 +1,303 @@
+---
+title: "Lab 2"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday, September 16, 12:00pm (noon) on Canvas
+
+**Instructions:**  There are two parts to this assignment. In Part I, you will practice fitting and using a logistic regression model. We will be working with data on the *Titanic* disaster in 1912 (you may have seen smaller versions of this dataset in previous classes). In Part II, you will practice more with maximum likelihood estimation.
+
+A template R Markdown file is provided: [lab_02_template.Rmd](https://sta214-f22.github.io/labs/lab_02_template.Rmd)
+
+When you are done with the lab, submit your knitted HTML file to Canvas. For Part II, you may submit a separate scan of your written work, if you prefer.
+
+# Data
+
+The RMS Titanic was a huge, luxury passenger liner designed and built in the early 20th century. Despite the fact that the ship was believed to be unsinkable, during her maiden voyage on April 15, 1912, the Titanic collided with an iceberg and sank. Of all the passengers and crew, less than half survived. Part of the reason why so few people survived has been attributed to the fact that the Titanic did not carry enough lifeboats for its passengers and crew. This meant that there was competition for space in the boats, and not everyone was able to make it aboard. Communication errors, stress and shock...there were a great many factors that contributed to this tragedy.
+
+The loss of life during the Titanic tragedy was enormous, but there were survivors. Was it random chance that these particular people survived? Or were there some specific characteristics of these people that led to their positions in the life boats? Let's investigate.
+
+We have observations on 12 different variables, some categorical and some numeric:
+
+* `Passenger`: A unique ID number for each passenger.
+* `Survived`: An indicator for whether the passenger survived (1) or perished (0) during the disaster.
+* `Pclass`: Indicator for the class of the ticket held by this passengers; 1 = 1st class, 2 = 2nd class, 3 = 3rd class.
+* `Name`: The name of the passenger.
+* `Sex`: Binary Indicator for the biological sex of the passenger.
+* `Age`: Age of the passenger in years; Age is fractional if the passenger was less than 1 year old.
+* `SibSp`: number of siblings/spouses the passenger had aboard the Titanic. Here, siblings are defined as brother, sister, stepbrother, and stepsister. Spouses are defined as husband and wife.
+* `Parch`: number of parents/children the passenger had aboard the Titanic. Here, parent is defined as mother/father and child is defined as daughter,son, stepdaughter or stepson. NOTE: Some children traveled only with a nanny, therefore parch=0 for them. There were no parents aboard for these children.
+* `Ticket`: The unique ticket number for each passenger.
+* `Fare`: How much the ticket cost in US dollars.
+* `Cabin`: The cabin number assigned to each passenger. Some cabins hold more than one passenger.
+* `Embarked`: Port where the passenger boarded the ship; C = Cherbourg, Q = Queenstown, S = Southampton
+
+Recall that our goal is to build a model to help explore what characteristics were related to whether or not a passenger survived the disaster.
+
+## Loading the data
+
+The `titanic` data can be loaded into R with the following command:
+
+```r
+titanic <- read.csv("https://sta214-f22.github.io/labs/Titanic.csv")
+```
+
+
+
+# Part I: Titanic Data
+
+## Data prep
+
+:::{.question}
+#### Question 1
+
+Looking at the available variables, there are some that are not valid choices for explanatory variables, meaning we can not use them as X variables in a parametric model. Which are they, and why can they not be used? Hint: There are three!
+
+:::
+
+
+:::{.question}
+#### Question 2
+
+Does the data set have any missing data? If so, remove the missing data and state how many rows you are now left with. (You will need to overwrite the `titanic` data, so that it does not contain any missing values).
+
+:::
+
+(You will notice that cleaning is something we will usually do with each new dataset).
+
+:::{.question}
+#### Question 3
+
+Fill in the following code to create a nicely formatted table showing how many passengers in the data survived and perished, and add a meaningful caption:
+
+```r
+titanic %>%
+  count(...) %>%
+  knitr::kable(caption="...")
+```
+
+:::
+
+## Parametric model
+
+We're interested in modeling the probability of surviving the disaster.
+
+:::{.question}
+#### Question 4
+
+Think about the realities of trying to get to life boats during a ship disaster. Do you think it is reasonable to assume that the probability of surviving is the same for every person on the ship? If not, explain what might have contributed to the chances of surviving. (There is no right answer for this second part, we are just brainstorming right now.)
+
+:::
+
+Instead of assuming every person has the same probability of success, let's choose a model that allows the probability to be different for different people, depending on some characteristic of that person. There are a lot of possible explanatory variables we could use, but let's start with $X_i = Fare_i$, the cost of the ticket for each passenger.
+
+If we assume that the probability differs depending on fare, our next step is to see how these two things (probability of survival and fare) might be connected so we can choose a reasonable model.
+
+We first need to explore the relationship between fare and the log odds of survival. We are going to do that using an *empirical log odds* (aka an *empirical logit*) plot
+
+We are going to use a function in R to produce the empirical log odds plot. To do so, create an R chunk, copy the LONG function below, paste it into an R chunk in your Markdown, and run it. You will notice that nothing seems to happen, but if you check the top Environment panel of your RStudio session, you should notice that a new function called `logodds_plot` has appeared. R allows users to create functions as needed, and in essence you have just "taught" R a new function. This function was written by Dr. Evans, which means you will have the flexibility to adapt it later if needed!
+
+```r
+logodds_plot <- function(data, num_bins, bin_method,
+                         x_name, y_name, grouping = NULL, reg_formula = y ~ x){
+  
+  if(is.null(grouping)){
+    dat <- data.frame(x = data %>% pull(x_name), 
+                      y = data %>% pull(y_name),
+                      group = 1)
+  } else {
+    dat <- data.frame(x = data %>% pull(x_name), 
+                      y = data %>% pull(y_name),
+                      group = data %>% pull(grouping))
+  }
+  
+  if(bin_method == "equal_size"){
+    logodds_table <- dat %>%
+      drop_na() %>%
+      arrange(group, x) %>%
+      group_by(group) %>%
+      mutate(obs = y,
+             bin = rep(1:num_bins,
+                       each=ceiling(n()/num_bins))[1:n()]) %>%
+      group_by(bin, group) %>%
+      summarize(mean_x = mean(x),
+                prop = mean(c(obs, 0.5)),
+                num_obs = n()) %>%
+      ungroup() %>%
+      mutate(logodds = log(prop/(1 - prop)))
+  } else {
+    logodds_table <- dat %>%
+      drop_na() %>%
+      group_by(group) %>%
+      mutate(obs = y,
+             bin = cut(x, 
+                       breaks = num_bins,
+                       labels = F)) %>%
+      group_by(bin, group) %>%
+      summarize(mean_x = mean(x),
+                prop = mean(c(obs, 0.5)),
+                num_obs = n()) %>%
+      ungroup() %>%
+      mutate(logodds = log(prop/(1 - prop)))
+  }
+  
+  if(is.null(grouping)){
+    logodds_table %>%
+      ggplot(aes(x = mean_x,
+                 y = logodds)) +
+      geom_point(size=2) +
+      geom_smooth(se=F, method="lm", formula = reg_formula) +
+      theme_bw() +
+      labs(x = x_name,
+           y = "Empirical log odds") +
+      theme(text = element_text(size=25))
+  } else {
+    logodds_table %>%
+      ggplot(aes(x = mean_x,
+                 y = logodds,
+                 color = group,
+                 shape = group)) +
+      geom_point(size=2) +
+      geom_smooth(se=F, method="lm", formula = reg_formula) +
+      theme_bw() +
+      labs(x = x_name,
+           y = "Empirical log odds",
+           color = grouping,
+           shape = grouping) +
+      theme(text = element_text(size=25))
+  }
+  
+}
+```
+
+To use the function, you will need to specify the inputs, meaning the pieces of information the computer needs in order to run the code.
+
+* `data`: the dataset of interest (e.g., `titanic`)
+* `num_bins`: the number of bins to use
+  * The number of bins should be chosen based on the size of the data. For example, with `bin_method = "equal_size"`, we probably want at least 15 observations per bin, so `num_bins` < (number of observations)/15
+* `bin_method`: whether to choose bins with the same number of observations (`"equal_size"`) or the same width (`"equal_width"`)
+* `x`: the name of the column containing the explanatory variable (e.g., `"Fare"`). The quotation marks are needed
+* `y`: the name of the column containing the response (e.g., `"Survived"`). The quotation marks are needed
+* `reg_formula`: This is the shape of the relationship you want to plot. If you want a line, this is y ~ x (the default). Some other examples:
+  * `y ~ log(x)` : a log transformation of x
+  * `y ~ sqrt(x)` : a square root transformation of x
+  * `y ~ poly(x, 2)` : a second-order polynomial
+  * `y ~ poly(x, 3)` : a third-order polynomial
+
+
+:::{.question}
+#### Question 5
+
+Create the empirical logit plot by running the code below: 
+
+```r
+logodds_plot(titanic, 30, "equal_size", "Fare", "Survived",
+             reg_formula = y ~ x)
+```
+
+Do you feel comfortable claiming the shape is linear?
+
+:::
+
+If we do not see a line, that doesn't mean we cannot use logistic regression. It just means we have to change the right hand side of our logistic regression model to reflect a shape other than a line.
+
+:::{.question}
+#### Question 6
+
+Adapt the `reg_formula` part of the code to try and see if a non-linear shape is a better fit for this relationship. Show the plot you choose.
+
+:::
+
+Based on our exploratory data analysis, let's write down a model for the relationship between fare and survival. To write the model nicely in R Markdown, let's talk about how to write math in R Markdown.
+
+### Writing math in R Markdown
+
+Doing things like writing down distributions often involve parameters. Parameters in statistics are generally represented as Greek letters. How can we write Greek letters and other mathematical notation in our Markdown file so they show up when we knit?
+
+If you want to write mathematical notation, we need to tell Markdown, "Hey, we're going to make a math symbol!" To do that, you use dollar signs. For instance, to make $\widehat{\beta}_1$, you simply put `$\widehathat{\beta}_1$` into the white space (not a chunk) in your Markdown.
+
+Go ahead and do that. See how the dollar signs change colors? Also note that if you hover your mouse over what you just pasted, the mathematical symbol we want will appear.
+
+If you want the symbol to appear on its own line in your Markdown, you need to put two `$` signs at the beginning and end of the line (so `$$`). Try that now.
+
+The same thing works for other mathematical symbols. Let's say I want to write out a regression line. The code is `$\widehat{Y_i} = \widehat{\beta}_0 + \widehat{\beta}_1 X_i$`.
+
+:::{.question}
+#### Question 7
+
+Let's write down the two parts of our model (the distribution of the response, and the relationship between the parameter and the predictor). Copy and paste the following into the white space in R Markdown:
+
+`$$Y_i \sim Bernoulli(\pi_i)$$`
+
+`$$\log\left(\dfrac{\pi_i}{1-\pi_i}\right) = \beta_0 + \beta_1 X_i$$`
+
+Now change the second line: replace $X$ with a word that describes your explanatory variable, and make any other changes needed to reflect the shape of the relationship you have chosen.
+
+:::
+
+
+## Fitting the model
+
+Fit the logistic regression model chosen above in R, using the `glm` function. Make sure the shape matches the shape you chose above, and use `family=binomial` to specify logistic regression.
+
+:::{.question}
+#### Question 8
+
+Write down the fitted model (regression line) in logistic form. To do this, paste the following into the white space in RMarkdown and adapt to reflect the actual numeric values and shape of your fitted model (scroll to the right to see the full line):
+
+```
+$$log\left(\dfrac{\widehat{\pi}_i}{1-\widehat{\pi}_i}\right) = \widehat{\beta}_0 + \widehat{\beta}_1 X_i$$
+```
+
+:::
+
+:::{.question}
+#### Question 9
+
+Report the deviance and log-likelihood for the fitted model.
+
+:::
+
+:::{.question}
+#### Question 10
+
+Using your fitted model, what is the predicted probability of survival for someone who paid $100 for their ticket? Show your work and use appropriate notation in your answer.
+
+:::
+
+:::{.question}
+#### Question 11
+
+We are interested in whether there is a relationship between passenger fare and survival. Using the fitted regression model, carry out a hypothesis test, where the null hypothesis is that there is no relationship between passenger fare and survival, and the alternative hypothesis is that there is a positive relationship. You will need to:
+
+* State the null and alternative hypotheses in terms of a coefficient in the regression model
+* Calculate the test statistic and p-value
+* Report your conclusions in context
+
+:::
+
+# Part II: Practice with maximum likelihood estimation
+
+(Note that this part is separate from the Titanic data you were working with above in Part I).
+
+In the second part of this lab, we will practice more with maximum likelihood estimation. Suppose that $Y_i$ is a random variable which can take values $y = 0, 1, 2, 3, ...$. The probability of each possible observation is
+
+$P(Y_i = y) = \dfrac{\lambda^y e^{-\lambda}}{y!}$, 
+
+where $\lambda$ is an unknown parameter. (Recall that $y! = y(y-1)(y-2) \cdots (2)(1)$ ).
+
+To estimate $\lambda$, we observe a sample of $n$ observations, $Y_1, Y_2, ..., Y_n$. For an estimate $\widehat{\lambda}$, the likelihood is therefore
+
+$L(\widehat{\lambda}) = \prod \limits_{i=1}^n \dfrac{\widehat{\lambda}^{Y_i} e^{-\widehat{\lambda}}}{Y_i!}$
+
+
+:::{.question}
+#### Question 12
+
+Calculate the maximum likelihood estimate of $\lambda$. Show all your steps.
+
+:::

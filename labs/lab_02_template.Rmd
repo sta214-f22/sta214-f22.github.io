@@ -1,0 +1,52 @@
+---
+---
+---
+title: "Lab 2"
+author: "Your Name"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+titanic <- read.csv("https://sta214-f22.github.io/labs/Titanic.csv")
+```
+
+## Question 1
+
+
+## Question 2
+
+
+## Question 3
+
+
+## Question 4
+
+
+
+## Question 5
+
+
+## Question 6
+
+
+## Question 7
+
+
+## Question 8
+
+
+## Question 9
+
+
+## Question 10
+
+
+## Question 11
+
+
+## Question 12
+
+
+
