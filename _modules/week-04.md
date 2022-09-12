@@ -4,6 +4,7 @@ title: Multiple logistic regression
 
 September 12
 : Multiple logistic regression
+  : [Slides](https://sta214-f22.github.io/slides/lecture_10.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture_10.html)
   
 : Textbook 6.7
 

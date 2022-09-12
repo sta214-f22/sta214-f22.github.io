@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Logistic regression with multiple predictors</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs-2.14/header-attrs.js"></script>
+    <link rel="stylesheet" href="lab-slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Logistic regression with multiple predictors
+]
+
+---
+
+
+### Scenario: dengue fever in Vietnam
+
+.large[
+* *Dengue fever*: a mosquito-borne viral disease, which infects hundreds of millions of people a year. Common in tropical climates
+* Researchers in Vietnam are interested in identifying the relationship between specific symptoms and the probability of having dengue
+* Lab tests are available, but may take time to return results and/or be expensive
+]
+
+---
+
+### Data
+
+.large[
+Data on 5720 Vietnamese children, admitted to hospital with possible dengue fever. Variables include:
+* `Dengue`: whether the patient actually has dengue fever, based on a lab test (0 = no, 1 = yes)
+* `Temperature`: patient's body temperature (in Celsius)
+* `Abdominal`: whether the patient has abdominal pain (0 = no, 1 = yes)
+* `HCT`: patient's hematocrit (proportion of red blood cells)
+* `Age`: patient's age (in years)
+* `Sex`: patient's sex 
+* `+` several others
+]
+
+---
+
+### Research question
+
+.large[
+You are approached by the researchers to help analyze their data. Their initial question: 
+
+*What is the relationship between temperature and the probability of dengue, and does the relationship differ if the patient also presents with abdominal pain?*
+]
+
+---
+
+### Exploratory data analysis
+
+.large[
+.question[
+How can we visualize the relationship between temperature and the probability of having dengue?
+]
+]
+
+---
+
+### Exploratory data analysis
+
+&lt;img src="lecture_10_files/figure-html/unnamed-chunk-1-1.png" style="display: block; margin: auto;" /&gt;
+
+.large[
+.question[
+Based on the empirical log odds plot, what would be a reasonable model for the relationship between temperature and the probability a patient has dengue?
+]
+]
+
+---
+
+### Initial model
+
+.large[
+`$$Y_i \sim Bernoulli(\pi_i)$$`
+
+`$$\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \ Temperature_i$$`
+]
+
+.large[
+We're also interested in whether this relationship is different depending on abdominal pain.
+.question[
+What plot can I use to investigate this question?
+]
+]
+
+---
+
+### Exploratory data analysis
+
+&lt;img src="lecture_10_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
+
+.large[
+.question[
+Based on this plot, what would be a reasonable model that incorporates both temperature and abdominal pain?
+]
+]
+
+---
+
+### Adding abdominal pain
+
+.large[
+`$$Y_i \sim Bernoulli(\pi_i)$$`
+]
+
+.large[
+`\begin{align}
+\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) &amp;= \beta_0 + \beta_1 \ Temperature_i + \beta_2 \ Abdominal_i \\ &amp; \hspace{0.5cm} + \beta_3 \ Temperature_i \cdot Abdominal_i
+\end{align}`
+]
+
+.large[
+* The interaction term allows the relationship between temperature and `\(\pi_i\)` to change depending on abdominal pain
+]
+
+---
+
+### Class activity
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_10.html](https://sta214-f22.github.io/class_activities/ca_lecture_10.html)
+]
+
+---
+
+### Class activity
+
+.large[
+`\begin{align}
+\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) &amp;= -7.745 + 0.178 \ Temperature_i \\
+&amp; \hspace{0.5cm} - 6.129 \ Abdominal_i \\ 
+&amp; \hspace{0.5cm} + 0.166 \ Temperature_i \cdot Abdominal_i
+\end{align}`
+]
+
+.large[
+.question[
+What is the estimated probability of dengue for a patient with a temperature of 38C and abdominal pain?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+`\begin{align}
+\log \left( \dfrac{\widehat{\pi}_i}{1 - \widehat{\pi}_i} \right) &amp;= -7.745 + 0.178 \ Temperature_i \\
+&amp; \hspace{0.5cm} - 6.129 \ Abdominal_i \\ 
+&amp; \hspace{0.5cm} + 0.166 \ Temperature_i \cdot Abdominal_i
+\end{align}`
+]
+
+.large[
+.question[
+For patients with abdominal pain, what is the estimated change in odds associated with an increase in temperature of 1C?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+`$$Y_i \sim Bernoulli(\pi_i)$$`
+
+`\begin{align}
+\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) &amp;= \beta_0 + \beta_1 \ Temperature_i + \beta_2 \ Abdominal_i \\ 
+&amp; \hspace{0.5cm} + \beta_3 \ Temperature_i \cdot Abdominal_i
+\end{align}`
+]
+
+.large[
+I want to test whether there is a relationship between abdominal pain and the probability of dengue, after accounting for the relationship between temperature and the probability of dengue.
+.question[
+What are my null and alternative hypotheses?
+]
+]
+
+---
+
+### Hypothesis testing
+
+.large[
+`$$Y_i \sim Bernoulli(\pi_i)$$`
+
+`\begin{align}
+\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) &amp;= \beta_0 + \beta_1 \ Temperature_i + \beta_2 \ Abdominal_i \\ 
+&amp; \hspace{0.5cm} + \beta_3 \ Temperature_i \cdot Abdominal_i
+\end{align}`
+]
+
+.large[
+**Hypotheses:**
+
+`$$H_0: \beta_2 = \beta_3 = 0$$`
+
+`$$H_A: \text{at least one of } \beta_2, \beta_3 \neq 0$$`
+]
+
+.large[
+.question[
+Which type of test can I use to test these hypotheses ( Wald test, likelihood ratio test, or either)?
+]
+]
+
+---
+
+### Likelihood ratio test
+
+.large[
+`$$Y_i \sim Bernoulli(\pi_i)$$`
+
+`\begin{align}
+\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) &amp;= \beta_0 + \beta_1 \ Temperature_i + \beta_2 \ Abdominal_i \\ 
+&amp; \hspace{0.5cm} + \beta_3 \ Temperature_i \cdot Abdominal_i
+\end{align}`
+]
+
+.large[
+**Hypotheses:**
+
+`$$H_0: \beta_2 = \beta_3 = 0$$`
+
+`$$H_A: \text{at least one of } \beta_2, \beta_3 \neq 0$$`
+]
+
+.large[
+.question[
+What are my full and reduced models?
+]
+]
+
+---
+
+### Full and reduced models
+
+.large[
+**Full model:**
+
+`\begin{align}
+\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) &amp;= \beta_0 + \beta_1 \ Temperature_i + \beta_2 \ Abdominal_i \\ 
+&amp; \hspace{0.5cm} + \beta_3 \ Temperature_i \cdot Abdominal_i
+\end{align}`
+
+**Reduced model:**
+
+`$$\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) = \beta_0 + \beta_1 \ Temperature_i$$`
+]
+
+---
+
+### Test statistic
+
+.large[
+`$$G = \text{deviance of reduced model } - \text{deviance of full model}$$`
+]
+
+.large[
+**Full model:**
+
+
+```
+## Null Deviance:	    6956 
+## Residual Deviance: 6914 	AIC: 6922
+```
+]
+
+.large[
+**Reduced model:**
+
+
+```
+## Null Deviance:	    6956 
+## Residual Deviance: 6927 	AIC: 6931
+```
+]
+
+.large[
+`$$G =$$`
+.question[
+How do I calculate a p-value for this test statistic?
+]
+]
+
+---
+
+### p-value
+
+.large[
+`$$G = 6927 - 6914 = 13 \hspace{1cm} G \sim \chi^2_k$$`
+where `\(k =\)` difference in number of parameters between full and reduced models.
+
+.question[
+What is `\(k\)` for this test?
+]
+]
+
+---
+
+### p-value
+
+.large[
+`$$G = 6927 - 6914 = 13 \hspace{1cm} G \sim \chi^2_k$$`
+where `\(k =\)` difference in number of parameters between full and reduced models.
+
+
+```r
+pchisq(13, df=2, lower.tail=F)
+```
+
+```
+## [1] 0.001503439
+```
+]
+
+---
+
+### Conclusion
+
+.large[
+* **Question:** Is there a relationship between abdominal pain and the probability of dengue, after accounting for the relationship between temperature and the probability of dengue?
+* **Hypotheses:**
+`$$H_0: \beta_2 = \beta_3 = 0$$`
+
+`$$H_A: \text{at least one of } \beta_2, \beta_3 \neq 0$$`
+* **p-value:** 0.0015
+* **Conclusion:** There is strong evidence that there is a relationship between abdominal pain and the probability of dengue, after accounting for the relationship between temperature and the probability of dengue.
+]
+
+---
+
+### A new question...
+
+.large[
+You report your results to the hospital, and they ask a follow-up question: 
+
+*Does the model improve when we add hematocrit (the proportion of red blood cells)?*
+]
+
+---
+
+### Exploratory data analysis
+
+&lt;img src="lecture_10_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" /&gt;
+
+.large[
+.question[
+Does it look like we need an interaction between hematocrit (HCT) and abdominal pain?
+]
+]
+
+---
+
+### Exploratory data analysis
+
+&lt;img src="lecture_10_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
+
+.large[
+.question[
+How can I check whether there might be an interaction between temperature and hematocrit?
+]
+]
+
+---
+
+### Exploratory data analysis
+
+.large[
+Define `\(TempHigh\)` by 
+* `\(TempHigh_i = 1\)` if `\(Temperature_i &gt; 38\)`
+* `\(TempHigh_i = 0\)` if `\(Temperature_i &lt;= 38\)`
+]
+
+&lt;img src="lecture_10_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Exploratory data analysis
+
+&lt;img src="lecture_10_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+
+.large[
+.question[
+Does it look like we need an interaction between temperature and hematocrit?
+]
+]
+
+---
+
+### Model
+
+.large[
+`$$Y_i \sim Bernoulli(\pi_i)$$`
+]
+
+.large[
+`\begin{align}
+\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) &amp;= \beta_0 + \beta_1 \ Temperature_i + \beta_2 \ Abdominal_i \\
+&amp; \hspace{0.5cm} + \beta_3 \ Temperature_i \cdot Abdominal_i \\
+&amp; \hspace{0.5cm} + \beta_4 \ HCT_i
+\end{align}`
+]
+
+.large[
+* Note that while we binarized temperature for EDA, we use the original variable in the model here
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
