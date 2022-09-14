@@ -10,6 +10,8 @@ September 12
 
 September 14
 : Multiple logistic regression, prediction  
+  : [Slides](https://sta214-f22.github.io/slides/lecture_11.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture_11.html)
+
 : Textbook 6.7
 
 September 16

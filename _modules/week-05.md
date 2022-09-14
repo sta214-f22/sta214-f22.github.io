@@ -3,7 +3,7 @@ title: Exam 1
 ---
 
 September 19
-: Review day
+: Work/Review day
 
 September 21
 : **Exam 1**{: .label .label-red }

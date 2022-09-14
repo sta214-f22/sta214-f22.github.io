@@ -1,0 +1,97 @@
+---
+title: "Class Activity, September 14"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+## Setup
+
+In this class activity, we will work with the dengue fever data we have been using in the slides. We have data on 5720 Vietnamese children, admitted to hospital with possible dengue fever. The variables we will use today are:
+
+* `Dengue`: whether the patient actually has dengue fever, based on a lab test (0 = no, 1 = yes)
+* `Temperature`: patient's body temperature (in Celsius)
+* `Abdominal`: whether the patient has abdominal pain (0 = no, 1 = yes)
+* `HCT`: patient's hematocrit (proportion of red blood cells)
+
+# Part I
+
+Letting $Y_i = 1$ if patient $i$ has dengue, and 0 otherwise, our model is
+
+$$Y_i \sim Bernoulli(\pi_i)$$
+
+\begin{align}
+\log \left( \dfrac{\pi_i}{1 - \pi_i} \right) &= \beta_0 + \beta_1 \ Temperature_i + \beta_2 \ Abdominal_i \\
+& \hspace{0.5cm} + \beta_3 \ Temperature_i \cdot Abdominal_i \\
+& \hspace{0.5cm} + \beta_4 \ HCT_i
+\end{align}
+
+```{r, include=F}
+library(tidyverse)
+library(knitr)
+
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+   lines <- options$output.lines
+   if (is.null(lines)) {
+     return(hook_output(x, options))  # pass to default hook
+   }
+   x <- unlist(strsplit(x, "\n"))
+   more <- "..."
+   if (length(lines)==1) {        # first n lines
+     if (length(x) > lines) {
+       # truncate the output, but add ....
+       #x <- c(head(x, lines), more)
+       x <- c(head(x, lines))
+     }
+   } else {
+     #x <- c(more, x[lines], more)
+     x <- c(x[lines])
+   }
+   # paste these lines together
+   x <- paste(c(x, ""), collapse = "\n")
+   hook_output(x, options)
+ })
+
+dengue <- read.csv("https://sta712-f22.github.io/homework/dengue.csv")
+```
+
+```{r, output.lines=10:23}
+dengue_glm2 <- glm(Dengue ~ Temperature*Abdominal + HCT, family = binomial, data = dengue)
+summary(dengue_glm2)
+```
+
+1. What is the estimated change in odds associated with a 1 point increase in hematocrit, holding temperature and abdominal pain constant?
+
+2. The deviance for the fitted model *without* hematocrit was 6914. How does the deviance change when we add hematocrit to the model?
+
+3. Researchers want to test whether there is a relationship between hematocrit and the probability a patient has dengue, after accounting for temperature and abdominal pain. Carry out a hypothesis test to investigate this research question.
+
+# Part II
+
+Using our model with temperature, abdominal pain, and hematocrit, our confusion matrix is
+
+| | | Actual | |
+| --- | --- | --- | --- |
+| | | $Y = 0$ | $Y = 1$ |
+|**Predicted** | $\widehat{Y} = 0$ | 3957 | 1631 |
+| | $\widehat{Y} = 1$ | 66 | 66 |
+
+4. Are our predictions better for patients who actually have dengue, or for patients who don't have dengue?
+
+The researchers want to build a model to predict dengue from easily observed symptoms. This would allow them to treat patients without running costly and time-consuming lab tests. An alternative to their model is a *rapid test*, which is cheaper than gold-standard lab tests but still costs money.
+
+The rapid test doesn't perfectly predict dengue, but it does a pretty good job. Here's the confusion matrix for the rapid test:
+
+| | | Actual | |
+| --- | --- | --- | --- |
+| | | $Y = 0$ | $Y = 1$ |
+|**Predicted** | $\widehat{Y} = 0$ | 3990 | 503 |
+| | $\widehat{Y} = 1$ | 33 | 1194 |
+
+5. Calculate the accuracy of the rapid test.
+
+6. Which method would you prefer -- our logistic regression model, or the rapid test?
