@@ -1,0 +1,295 @@
+---
+title: "Lab 3"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday, September 23, 12:00pm (noon) on Canvas
+
+**Instructions:**  There are two parts to this assignment. In Part I, you will practice fitting and using a logistic regression model. We will be working with the dengue data we discussed in class. In Part II, you will practice more with maximum likelihood estimation.
+
+A template R Markdown file is provided: [lab_03_template.Rmd](https://sta214-f22.github.io/labs/lab_03_template.Rmd)
+
+When you are done with the lab, submit your knitted HTML file to Canvas. For Part II, you may submit a separate scan of your written work, if you prefer.
+
+# Data
+
+Dengue fever is a mosquito-borne viral disease, which infects hundreds of millions of people a year, particularly in tropical climates. There are two different lab tests available for detecting dengue: a gold-standard test, which may be time consuming or expensive to run, and a rapid test which provides quicker results but isn't perfectly accurate. Researchers in Vietnam are interested in creating a new way to diagnose dengue: by building a logistic regression model that predicts the probability an individual has dengue based on standard diagnostic tools like their temperature, BMI, and white blood cell count.
+
+We have data on 5720 Vietnamese children, admitted to hospital with possible dengue fever. Variables include:
+
+* `SiteNumber`: The hospital at which the data was recorded 
+* `Sex`: patient's sex (female or male)
+* `Age`: patient's age (in years)
+* `DiseaseDay`: how long the patient has been ill
+* `Vomiting`: whether the patient has experienced vomiting (0 = no, 1 = yes)
+* `Abdominal`: whether the patient has abdominal pain (0 = no, 1 = yes)
+* `Temperature`: patient's body temperature (in Celsius)
+* `BMI`: the patient's body mass index (BMI)
+* `WBC`: the patient's white blood cell count
+* `HCT`: the patient's hematocrit
+* `PLT`: the patient's platelet count
+* `RapidTest`: predicted disease status from a rapid test (positive or negative)
+* `Dengue`: whether the patient actually has dengue fever, based on a lab test (0 = no, 1 = yes)
+
+## Loading the data
+
+The `dengue` data can be loaded into R with the following command:
+
+```r
+dengue <- read.csv("https://sta214-f22.github.io/labs/dengue.csv")
+```
+
+# Part I: dengue data
+
+In class, we looked at hematocrit, temperature, and abdominal pain, but the researchers weren't happy with our model's predictions. They ask us to start again, and this time they want us to focus on the blood test variables (WBC, HCT, and PLT).
+
+## Initial model
+
+Let's start with white blood cell count (WBC). We first need to check whether the relationship between WBC and the log odds looks linear, or whether we should consider a transformation.
+
+We will explore this question with empirical log odds plots. The `logodds_plot` function can be used for creating empirical log odds plots:
+
+```r
+logodds_plot <- function(data, num_bins, bin_method,
+                         x_name, y_name, grouping = NULL, 
+                         reg_formula = y ~ x){
+  
+  if(is.null(grouping)){
+    dat <- data.frame(x = data %>% pull(x_name), 
+                      y = data %>% pull(y_name),
+                      group = 1)
+  } else {
+    dat <- data.frame(x = data %>% pull(x_name), 
+                      y = data %>% pull(y_name),
+                      group = as.factor(data %>% pull(grouping)))
+  }
+  
+  if(bin_method == "equal_size"){
+    logodds_table <- dat %>%
+      drop_na() %>%
+      arrange(group, x) %>%
+      group_by(group) %>%
+      mutate(obs = y,
+             bin = rep(1:num_bins,
+                       each=ceiling(n()/num_bins))[1:n()]) %>%
+      group_by(bin, group) %>%
+      summarize(mean_x = mean(x),
+                prop = mean(c(obs, 0.5)),
+                num_obs = n()) %>%
+      ungroup() %>%
+      mutate(logodds = log(prop/(1 - prop)))
+  } else {
+    logodds_table <- dat %>%
+      drop_na() %>%
+      group_by(group) %>%
+      mutate(obs = y,
+             bin = cut(x, 
+                       breaks = num_bins,
+                       labels = F)) %>%
+      group_by(bin, group) %>%
+      summarize(mean_x = mean(x),
+                prop = mean(c(obs, 0.5)),
+                num_obs = n()) %>%
+      ungroup() %>%
+      mutate(logodds = log(prop/(1 - prop)))
+  }
+  
+  if(is.null(grouping)){
+    logodds_table %>%
+      ggplot(aes(x = mean_x,
+                 y = logodds)) +
+      geom_point(size=2) +
+      geom_smooth(se=F, method="lm", formula = reg_formula) +
+      theme_bw() +
+      labs(x = x_name,
+           y = "Empirical log odds") +
+      theme(text = element_text(size=15))
+  } else {
+    logodds_table %>%
+      ggplot(aes(x = mean_x,
+                 y = logodds,
+                 color = group,
+                 shape = group)) +
+      geom_point(size=2) +
+      geom_smooth(se=F, method="lm", formula = reg_formula) +
+      theme_bw() +
+      labs(x = x_name,
+           y = "Empirical log odds",
+           color = grouping,
+           shape = grouping) +
+      theme(text = element_text(size=15))
+  }
+  
+}
+```
+
+To use the function, you will need to specify the inputs, meaning the pieces of information the computer needs in order to run the code.
+
+* `data`: the dataset of interest (e.g., `titanic`)
+* `num_bins`: the number of bins to use
+  * The number of bins should be chosen based on the size of the data. For example, with `bin_method = "equal_size"`, we probably want at least 15 observations per bin, so `num_bins` < (number of observations)/15
+* `bin_method`: whether to choose bins with the same number of observations (`"equal_size"`) or the same width (`"equal_width"`)
+* `x`: the name of the column containing the explanatory variable (e.g., `"Fare"`). The quotation marks are needed
+* `y`: the name of the column containing the response (e.g., `"Survived"`). The quotation marks are needed
+* `grouping`: Fit a separate line for different levels of the grouping variable
+* `reg_formula`: This is the shape of the relationship you want to plot. If you want a line, this is y ~ x (the default). Some other examples:
+  * `y ~ log(x)` : a log transformation of x
+  * `y ~ sqrt(x)` : a square root transformation of x
+  * `y ~ poly(x, 2)` : a second-order polynomial
+  * `y ~ poly(x, 3)` : a third-order polynomial
+  
+:::{.question}
+#### Question 1
+
+Create an empirical log odds plot to examine the relationship between WBC and the empirical log odds of dengue. Use 20 bins in the plot, and specify a linear relationship in `reg_formula`.
+
+Do you feel comfortable claiming the shape is linear?
+
+:::
+
+:::{.question}
+#### Question 2
+
+Let's investigate other possible shapes for the relationship between WBC and the log odds. Create three other empirical log odds plots to explore a log transformation of WBC, a polynomial transformation of order 2, and a polynomial transformation of order 3. 
+
+Which shape looks like it fits the data best?
+
+:::
+
+The problem with higher-degree polynomials is that they can overfit the data, which means allowing our model to be too curvy and sometimes missing the big picture of the relationship. This is why we create numeric measures like AIC to compare models.
+
+:::{.question}
+#### Question 3
+
+For each of the 4 relationships considered in your empirical log odds plots (linear, log transform, second-order polynomial, and third-order polynomial), fit a logistic regression model, and calculate the deviance and AIC.
+
+Based on the AIC, which model would you choose? Does the model with the smallest AIC also have the smallest deviance here?
+:::
+
+## Adding other variables
+
+Now let's add PLT (platelet count) to the model. When adding another variable, we want to create some empirical log odds plots to see how the variable should be added.
+
+:::{.question}
+#### Question 4
+
+Create an empirical log odds plot for PLT, and pick the regression formula that looks best to you. Does the the relationship look linear?
+:::
+
+Since WBC is already in the model, we want to check for an interaction between WBC and PLT. To visually investigate whether there is an interaction, we want to create multiple lines on the empirical log odds plot for multiple values of PLT. Since PLT is quantitative, we'll turn it into a categorical variable for the plot.
+
+The code below creates an empirical log odds plot for log(WBC), grouped by PLT. Because it is easier to see parallel lines than parallel curves, we use the transformed version of WBC in the plot.
+
+```r
+dengue %>%
+  mutate(log_wbc = log(WBC),
+         PLTHigh = PLT > 250) %>%
+  logodds_plot(20, "equal_size", x = "log_wbc", y = "Dengue",
+               reg_formula = y ~ x, grouping = "PLTHigh")
+```
+
+:::{.question}
+#### Question 5
+
+Based on the plot, does it looks like there is an interaction between white blood cell count and platelet count?
+:::
+
+Finally, let's consider HCT. We already saw in class that it was reasonable to assume a linear relationship between HCT and the log odds, so we'll just explore interactions here.
+
+:::{.question}
+#### Question 6
+
+Modify the code above Question 5 to create empirical log odds plots that explore whether there is an interaction between HCT and WBC or PLT.
+:::
+
+:::{.question}
+#### Question 7
+
+Based on your investigations in questions 1 -- 6, fit a logistic regression model to predict the probability an individual has dengue, with WBC, HCT, and PLT as predictors. Write the equation of the fitted regression line.
+:::
+
+:::{.question}
+#### Question 8
+
+Calculate the AIC for your model in Question 7. Did adding HCT and PLT to the model decrease the AIC?
+:::
+
+## Prediction
+
+Now let's look at our model's prediction performance. We will use a threshold on our predicted probabilities, and then compare our predictions to the true dengue status with a confusion matrix.
+
+If `dengue_glm` is the name of our fitted model in R, then the following code will make a confusion matrix with a threshold of 0.5.
+
+```r
+preds <- ifelse(predict(dengue_glm, type="response") > 0.5, 1, 0)
+table("prediction" = preds, "truth" = dengue$Dengue)
+```
+
+For reference, the confusion matrix for the rapid test is
+
+| | | Actual | |
+| --- | --- | --- | --- |
+| | | $Y = 0$ | $Y = 1$ |
+|**Predicted** | $\widehat{Y} = 0$ | 3990 | 503 |
+| | $\widehat{Y} = 1$ | 33 | 1194 |
+
+:::{.question}
+#### Question 9
+
+Calculate the accuracy for our predictions, using a threshold of 0.5. How does our model compare to the rapid test?
+:::
+
+Of course, accuracy is just one measure of prediction performance, and can be misleading. Two other ways we can measure performance, which are often used together, are *sensitivity* (true positive rate) and *specificity* (true negative rate).
+
+$\text{sensitivity} = \dfrac{\text{number of true positives}}{\text{number of true positives + number of false negatives}}$
+
+$\text{specificity} = \dfrac{\text{number of true negatives}}{\text{number of true negatives + number of false positives}}$
+
+For the rapid test, using the confusion matrix above, the sensitivity is $1194/(1194 + 503)$, and the specificity is $3990/(3990 + 33)$.
+
+:::{.question}
+#### Question 10
+
+Calculate sensitivity and specificity for our model with a threshold of 0.5, and compare against the rapid test.
+:::
+
+:::{.question}
+#### Question 11
+
+Try a few different thresholds other than 0.5. How do sensitivity and specificity change when we increase the threshold? When we decrease the threshold?
+:::
+
+
+# Part II: Maximum likelihood estimation
+
+In logistic regression, we assume that $Y_i \sim Bernoulli(\pi_i)$. But in linear regression, we use a different distribution. For linear regression with a single predictor $X$ and response $Y$, our model is
+
+$$Y_i \sim N(\mu_i, \sigma^2)$$
+
+$$\mu_i = \beta_0 + \beta_1 X_i$$
+
+For now, let's assume that $\sigma^2 = 1$. Then, it turns out that the likelihood for parameter estimates $\widehat{\beta}_0$ and $\widehat{\beta}_1$ is
+
+$$L(\widehat{\beta}_0, \widehat{\beta}_1) \propto \prod \limits_{i=1}^n \exp \{ - \dfrac{1}{2}(Y_i - \widehat{\beta}_0 - \widehat{\beta}_1 X_i)^2 \}$$
+
+(where $\propto$ means "proportional to", i.e. equal up to a constant multiple).
+
+:::{.question}
+#### Question 12
+
+Based on the likelihood above, calculate the log likelihood, and show that the deviance is equivalent to the sum of the squared residuals (SSE).
+:::
+
+It turns out we can maximize the likelihood by hand, but it is a little complicated. To make it simpler, let's ignore the predictor $X$, so we just have the parameter $\beta_0$ and the likelihood is
+
+$$L(\widehat{\beta}_0) \propto \prod \limits_{i=1}^n \exp \{ - \dfrac{1}{2}(Y_i - \widehat{\beta}_0 )^2 \}$$
+
+:::{.question}
+#### Question 13
+
+Show that the maximum likelihood estimate is $\widehat{\beta}_0 = \dfrac{1}{n} \sum \limits_{i=1}^n Y_i$.
+:::

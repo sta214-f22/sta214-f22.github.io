@@ -1,0 +1,167 @@
+---
+title: "Lab 2 Solutions"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+titanic <- read.csv("https://sta279-s22.github.io/labs/Titanic.csv")
+
+titanic <- titanic %>%
+  drop_na()
+```
+
+Total: 31 pts
+
+## Question 1 (2 pts)
+
+(1 pt) Name, Passenger ID, and Ticket Number. (1 pt) These are basically unique identifiers for each passenger. We can't include a categorical predictor with a different level for every observation, and treating them as quantitative doesn't really make sense since ID numbers don't have much intrinsic meaning.
+
+**Grading:** You can be pretty flexible with their reasoning for the second part of the question.
+
+
+## Question 2 (2 pts)
+
+(1 pt) Yes, there is missing data. (1 pt) We remove 177 rows (we started with 891 and ended up with 714)
+
+**Grading:** If you look at the Cabin variable, there are a lot of entries that appear missing, even after removing missing data (this is because the missing cabin numbers are actually empty strings, not NAs). They don't need to discuss or notice this. But if they do, you don't need to take off any points.
+
+
+## Question 3 (2 pts)
+
+```{r}
+titanic %>%
+  count(Survived) %>%
+  knitr::kable(caption="Survival of passengers on the Titanic")
+```
+
+
+## Question 4 (2 pts)
+
+(Answers may vary)
+
+**Grading:** 1 point for No, 1 point for any explanation
+
+
+## Question 5 (2 pts)
+
+```{r echo=F, message=F}
+logodds_plot <- function(data, num_bins, bin_method,
+                         x, y, reg_formula = y ~ x){
+  
+  if(bin_method == "equal_size"){
+    logodds_table <- data.frame(x = data[,x], 
+                                y = data[,y]) %>%
+      drop_na() %>%
+      arrange(x) %>%
+      mutate(obs = y,
+             bin = rep(1:num_bins,
+                       each=ceiling(nrow(data)/num_bins))[1:nrow(data)]) %>%
+      group_by(bin) %>%
+      summarize(mean_x = mean(x),
+                prop = mean(c(obs, 0.5)),
+                num_obs = n()) %>%
+      ungroup() %>%
+      mutate(logodds = log(prop/(1 - prop)))
+  } else {
+    logodds_table <- data.frame(x = data[,x], 
+                                y = data[,y]) %>%
+      drop_na() %>%
+      mutate(obs = y,
+             bin = cut(x, 
+                       breaks = num_bins,
+                       labels = F)) %>%
+      group_by(bin) %>%
+      summarize(mean_x = mean(x),
+                prop = mean(c(obs, 0.5)),
+                num_obs = n()) %>%
+      ungroup() %>%
+      mutate(logodds = log(prop/(1 - prop)))
+  }
+  
+  logodds_table %>%
+    ggplot(aes(x = mean_x,
+               y = logodds)) +
+    geom_point(size=2) +
+    geom_smooth(se=F, method="lm", formula = reg_formula) +
+    theme_bw() +
+    labs(x = x,
+         y = "Empirical log odds") +
+    theme(text = element_text(size=20))
+}
+
+logodds_plot(titanic, 30, "equal_size", "Fare", "Survived",
+             reg_formula = y ~ x)
+```
+
+**Grading:** 1 pt for plot, 1 pt for identifying that a linear relationship does not look appropriate
+
+## Question 6 (2 pts)
+
+A logarithmic relationship looks pretty good here:
+
+```{r}
+logodds_plot(titanic, 30, "equal_size", "Fare", "Survived",
+             reg_formula = y ~ log(x))
+```
+
+**Grading:** 1 pt for plot, 1 pt for a reasonable transformation (log, square root, quadratic are all good options. But a cubic polynomial will overfit here)
+
+## Question 7 (2 pts)
+
+$$Y_i \sim Bernoulli(\pi_i)$$
+
+$$\log\left(\dfrac{\pi_i}{1-\pi_i}\right) = \beta_0 + \beta_1 \log(Fare_i + 1)$$
+(I'm adding 1 first because Fare is sometimes 0 in the dataset, so we need to adjust before taking the log)
+
+**Grading:** If they use a log transformation, it is ok if they don't write the `+ 1` in the formula
+
+## Question 8 (2 pts)
+
+```{r}
+titanic_glm <- glm(Survived ~ log(Fare + 1), 
+                   family=binomial, data = titanic)
+summary(titanic_glm)
+```
+
+$$\log\left(\dfrac{\widehat{\pi}_i}{1-\widehat{\pi}_i}\right) = -2.87 + 0.81 \log(Fare_i + 1)$$
+**Grading:** Fitted models may vary, depending on the transformation used, and depending on how they handled the missing data. Lose 1 point for missing hats and/or not plugging in the fitted values 
+
+## Question 9 (2 pts)
+
+Deviance = 877.58, log likelihood = $-0.5 \text{deviance}$ = -438.79
+
+**Grading:** Deviance will vary depending on the model they fit. Log likelihood should be $-0.5$ times deviance.
+
+
+## Question 10 (2 pts)
+
+If Fare = 100, then log(Fare + 1) = log(101) = 4.615. So the predicted log odds is $-2.87 + 0.81 (4.615) = 0.868$, which means the predicted probability is
+
+$$\widehat{\pi}_i = \dfrac{e^{0.868}}{1 + e^{0.868}} = 0.704$$
+
+**Grading:** Predicted probabilities vary depending on their model. Make sure they transform the fare, and that they correctly convert log odds to probability.
+
+## Question 11 (6 pts)
+
+We want to test whether there is a relationship between passenger fare and survival. For the model discussed above, this is equivalent to the hypotheses
+
+$H_0: \beta_1 = 0 \hspace{0.5cm} H_A: \beta_1 \neq 0$
+
+We can test this hypothesis with either a Wald test or a likelihood ratio test. I'll use a Wald test here. From the summary output in R, our test statistic is $z = 8.587$ (statistic may vary depending on their model), and the corresponding p-value is $\approx 0$. Therefore, we have strong evidence that there is a relationship between passenger fare and the probability of survival.
+
+**Grading:** 2 pts for hypotheses, 2 pts for correctly calculating p-value, 2 pts for conclusion. Hypotheses need to be written in terms of model parameters (one or more $\beta$s) They can use either a Wald or likelihood ratio test if they are testing a single parameter. If they test multiple parameters, they need to use a likelihood ratio test. The test statistic and p-value depend on their model of choice. If they used a polynomial function of Fare, then they have to test multiple parameters and use a likelihood ratio test. Lose 1 point if conclusion talks about rejecting/failing to reject null hypothesis, or compares p-value to a threshold like 0.05, 0.01, etc.
+
+
+### Question 12 (5 pts)
+
+$\log L(\widehat{\lambda}) = \sum \limits_{i=1}^n \left( Y_i \log(\widehat{\lambda}) - \widehat{\lambda} - \log(Y_i!) \right)$
+
+Differentiating, we get
+
+$\dfrac{d}{d \widehat{\lambda}} \log L(\widehat{\lambda}) = \sum \limits_{i=1}^n \left( \dfrac{Y_i}{\widehat{\lambda}} - 1 \right)$
+
+Setting to 0 and solving for $\widehat{\lambda}$, we get
+
+$\widehat{\lambda} = \frac{1}{n} \sum \limits_{i=1}^n Y_i$

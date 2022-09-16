@@ -1,0 +1,37 @@
+---
+title: Lab 3
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+### Agenda
+
+.large[
+* Reminder: Exam 1
+  * Wednesday September 21, in class
+  * Exam topics posted on Canvas
+  * Closed notes
+  * Bring a calculator (cannot use phone or laptop)
+  * I won't ask you to write R code, but you may need to interpret R output
+  * Questions similar to assignments and class activities
+* Monday:
+  * Bring any questions about the material
+  * Some time to work more on Lab 3
+* Today: Lab 3
+]
+
+---
+
+### Lab 3
+
+.large[
+[https://sta214-f22.github.io/labs/lab_3.html](https://sta214-f22.github.io/labs/lab_3.html)
+]

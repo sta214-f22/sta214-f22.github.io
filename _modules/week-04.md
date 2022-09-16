@@ -16,5 +16,6 @@ September 14
 
 September 16
 : **Lab**{: .label .label-purple } Lab 3
+  : [Slides](https://sta214-f22.github.io/slides/lecture_12.html), [Lab 3](https://sta214-f22.github.io/labs/lab_3.html)
 
 : **Lab 2 due**{: .label .label-red }
