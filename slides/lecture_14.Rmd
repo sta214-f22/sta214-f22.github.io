@@ -1,0 +1,415 @@
+---
+title: Multinomial logistic regression
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+### Agenda
+
+.large[
+* No homework this week
+* Extra credit opportunity: department seminar
+  * Dr. Mine Cetinkaya-Rundel
+  * Monday, September 26, 12pm - 1pm in Kirby 120
+* Today: multinomial logistic regression
+]
+
+---
+
+### Motivation
+
+.large[
+* When the response is binary, we use *logistic regression*
+* What happens when the response is categorical, but has MORE than 2 categories?
+* We use *multinomial logistic regression* (aka *multinomial regression*)
+]
+
+---
+
+### Motivation
+
+.large[
+**Question:** What is the relationship between age and contraceptive use for women in Indonesia?
+
+**Data:** 1473 Indonesian couples, with variables
+* $Y_i$ = contraceptive method used (1 = no use, 2 = long-term, 3 = short-term)
+* $X_i$ = Wife's age (numeric)
+]
+
+---
+
+### The response variable
+
+.large[
+```{r echo=F, message=F, warning=F}
+library(tidyverse)
+cmc_data <- read_csv("cmc.data.txt", col_names = F)
+colnames(cmc_data) <-c("WifeAge", "WifeEdu", "HusbandEdu", "NumChild", "WifeRel", "WifeWork", "HusbandOcc","Living", "Media", "Choice")
+cmc_data$Choice <- ifelse( cmc_data$Choice == 1, "None", ifelse(cmc_data$Choice==2, "Short", "Long"))
+knitr::kable(table("Contraception" = cmc_data$Choice))
+```
+
+* $n_{None} = 629$ (this is 42.7% of the couples)
+* $n_{Long} = 511$ (this is 34.7% of the couple)
+* $n_{Short} = 333$ (this is 22.6% of the couples)
+]
+
+---
+
+### The response variable
+
+.large[
+$Y_i$ = contraceptive method used (1 = no use, 2 = long-term, 3 = short-term)
+
+.question[
+What type of variable is $Y$?
+]
+]
+
+---
+
+### Parametric model building
+
+.large[
+.question[
+What are our two steps in building a parametric model?
+]
+]
+
+---
+
+### Building a distribution
+
+.large[
+$Y_i$ = contraceptive method used (1 = no use, 2 = long-term, 3 = short-term)
+
+.question[
+What notation might we use for the probability of no contraceptive use?
+]
+]
+
+---
+
+### Building a distribution
+
+.large[
+$Y_i$ = contraceptive method used (1 = no use, 2 = long-term, 3 = short-term)
+
+* $\pi_{i(None)} = P(Y_i = None)$
+* $\pi_{i(Short)} = P(Y_i = Short)$
+* $\pi_{i(Long)} = P(Y_i = Long)$
+
+.question[
+What must be true of the three probabilities?
+]
+]
+
+---
+
+### The Categorical distribution
+
+.large[
+.question[
+**Definition:** Let $Y_i$ be an **unordered** categorical variable with $J$ levels $j = 1,...,J$. Let $\pi_j = P(Y_i = j)$, where $\pi_j \in [0, 1]$ for all $j$, and $\sum \limits_{j=1}^J \pi_j = 1$.
+
+Then we say $Y_i \sim Categorical(\pi_1,...,\pi_J)$.
+]
+
+* We can use this distribution as the first step in our modeling process!
+
+.question[
+What distribution does our response (contraceptive use) have?
+]
+]
+
+---
+
+### Parametric model building
+
+.large[
+**Step 1: Choose a reasonable distribution for $Y$**
+
+$$Y_i \sim Categorical(\pi_{i(None)}, \pi_{i(Short)}, \pi_{i(Long)})$$
+
+**Step 2: Choose a model for any parameters**
+
+* Need to relate our probabilities to $X = Age$
+]
+
+---
+
+### EDA
+
+.large[
+```{r echo=F, message=F, fig.align='center', fig.width=7, fig.height=5}
+cmc_data %>%
+  ggplot(aes(x = Choice, y = WifeAge, fill = Choice)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Contraceptive choice", y = "Wife's Age (years)") +
+  theme(text = element_text(size=25))
+```
+]
+
+---
+
+### EDA
+
+.large[
+* Boxplots show there may be some differences with age, but don't let us model the relationship
+* We want something like an empirical log odds plot
+
+.question[
+Can we use the log odds here?
+]
+]
+---
+
+### Relative risk
+
+.large[
+* If $Y_i$ is *binary*, the odds $\dfrac{\pi_i}{1 - \pi_i}$ compare the probabilities of the two possible outcomes
+* If $Y_i$ has more than two outcomes, we need to generalize the odds
+* The *relative risk* compares the probabilities of two potential outcomes
+
+**Relative risk of long term vs. no contraceptive use:**
+
+<br/>
+
+**Relative risk of short term vs. no contraceptive use:**
+]
+
+---
+
+### Example
+
+.large[
+Consider the 48 twenty-one year old wives in our data:
+
+* Long: 23
+* Short: 6
+* None: 19
+
+.question[
+For a 21 year old, what is the *empirical* relative risk of using long term vs. short term contraceptives?
+]
+]
+
+---
+
+### Relative risk
+
+.large[
+.question[
+**Definition:** Let $Y_i$ be a categorical variable with $J$ levels $j=1,...,J$. Let $\pi_j = P(Y_i = j)$. Then the relative risk of level $j$ vs. level $k$ is 
+
+$$\dfrac{\pi_{ij}}{\pi_{ik}}$$
+]
+]
+
+---
+
+### Class activity, Part I
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_14.html](https://sta214-f22.github.io/class_activities/ca_lecture_14.html)
+]
+
+---
+
+### Class activity
+
+.large[
+
+| Speed Range | Slow | Good | Fast | Total |
+| --- | --- | --- | --- | --- |
+| $(50, 51)$ | 5 | 1 | 0 | 6 |
+| $(51, 52)$ | 5 | 5 | 3 | 13 |
+| $(52, 53)$ | 6 | 12 | 2 | 20 |
+| $(53, 54)$ | 5 | 31 | 4 | 40 |
+
+.question[
+    What is the relative risk of Good vs. Slow for the $(52,53)$ speed group?
+]
+]
+
+
+---
+
+### Class activity
+
+.large[
+.question[
+How would you interpret the relative risk of Good vs. Slow for the $(52, 53)$ speed group?
+]
+]
+  
+---
+
+### Log relative risk
+
+.large[
+Instead of modeling the log odds, we can model the *log relative risk*
+]
+
+```{r echo=F, fig.width=7, fig.height=5, fig.align='center'}
+cmc_data %>%
+  group_by(WifeAge) %>%
+  summarize(count_long = sum(Choice == "Long"),
+            count_none = sum(Choice == "None")) %>%
+  mutate(log_rr = log(count_long/count_none)) %>%
+  ggplot(aes(x = WifeAge, y = log_rr)) +
+  geom_point(size=2) +
+  labs(x = "Wife's Age", y = "Log RR: Long vs. None") +
+  theme_bw() +
+  theme(text = element_text(size=25))
+```
+
+---
+
+### Log relative risk
+
+.large[
+Instead of modeling the log odds, we can model the *log relative risk*
+]
+
+```{r echo=F, fig.width=7, fig.height=5, fig.align='center'}
+cmc_data %>%
+  group_by(WifeAge) %>%
+  summarize(count_long = sum(Choice == "Short"),
+            count_none = sum(Choice == "None")) %>%
+  mutate(log_rr = log(count_long/count_none)) %>%
+  ggplot(aes(x = WifeAge, y = log_rr)) +
+  geom_point(size=2) +
+  labs(x = "Wife's Age", y = "Log RR: Short vs. None") +
+  theme_bw() +
+  theme(text = element_text(size=25))
+```
+
+---
+
+### Multinomial regression model
+
+.large[
+**Step 1: Choose a reasonable distribution for $Y$**
+
+$$Y_i \sim Categorical(\pi_{i(None)}, \pi_{i(Short)}, \pi_{i(Long)})$$
+**Step 2: Choose a model for any parameters**
+
+$$\log \left( \dfrac{\pi_{i(Long)}}{\pi_{i(None)}} \right) = \beta_{0(Long)} + \beta_{1(Long)} Age_i$$
+$$\log \left( \dfrac{\pi_{i(Short)}}{\pi_{i(None)}} \right) = \beta_{0(Short)} + \beta_{1(Short)} Age_i$$
+* Pick a *reference* or *baseline* category to compare to (here it is None)
+]
+
+---
+
+### Multinomial regression model
+
+.large[
+**Step 1: Choose a reasonable distribution for $Y$**
+
+$$Y_i \sim Categorical(\pi_{i(None)}, \pi_{i(Short)}, \pi_{i(Long)})$$
+**Step 2: Choose a model for any parameters**
+
+$$\log \left( \dfrac{\pi_{i(Long)}}{\pi_{i(None)}} \right) = \beta_{0(Long)} + \beta_{1(Long)} Age_i$$
+$$\log \left( \dfrac{\pi_{i(Short)}}{\pi_{i(None)}} \right) = \beta_{0(Short)} + \beta_{1(Short)} Age_i$$
+
+.question[
+From the empirical log relative risk plots, did it look like the log relative risk was a linear function of Age?
+]
+]
+
+---
+
+### Log relative risk
+
+```{r echo=F, fig.width=7, fig.height=5, fig.align='center'}
+cmc_data %>%
+  group_by(WifeAge) %>%
+  summarize(count_long = sum(Choice == "Long"),
+            count_none = sum(Choice == "None")) %>%
+  mutate(log_rr = log(count_long/count_none)) %>%
+  ggplot(aes(x = WifeAge, y = log_rr)) +
+  geom_point(size=2) +
+  geom_smooth(se=F, method="lm", formula= y ~ poly(x,2)) +
+  labs(x = "Wife's Age", y = "Log RR: Long vs. None") +
+  theme_bw() +
+  theme(text = element_text(size=25))
+```
+
+---
+
+### Multinomial regression model
+
+.large[
+**Step 1: Choose a reasonable distribution for $Y$**
+
+$$Y_i \sim Categorical(\pi_{i(None)}, \pi_{i(Short)}, \pi_{i(Long)})$$
+**Step 2: Choose a model for any parameters**
+
+$$\log \left( \dfrac{\pi_{i(Long)}}{\pi_{i(None)}} \right) = \beta_{0(Long)} + \beta_{1(Long)} Age_i + \beta_{2(Long)} Age_i^2$$
+$$\log \left( \dfrac{\pi_{i(Short)}}{\pi_{i(None)}} \right) = \beta_{0(Short)} + \beta_{1(Short)} Age_i + \beta_{2(Short)} Age_i^2$$
+]
+
+---
+
+### Estimated model
+
+.large[
+$$\log \left( \dfrac{\widehat{\pi}_{i(Long)}}{\widehat{\pi}_{i(None)}} \right) = -5.07 + 0.37 Age_i - 0.0063 Age_i^2$$
+
+$$\log \left( \dfrac{\widehat{\pi}_{i(Short)}}{\widehat{\pi}_{i(None)}} \right) = -8.21 + 0.46 Age_i - 0.0065 Age_i^2$$
+
+.question[
+What is the predicted relative risk of long term vs. none for a woman age 30?
+]
+]
+
+---
+
+### Class activity, Part II
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_14.html](https://sta214-f22.github.io/class_activities/ca_lecture_14.html)
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+Write down the population multinomial regression model, using Slow as the reference category, and assuming that the log relative risk is a linear function of Speed.
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$\log \left( \dfrac{\widehat{\pi}_{i(Good)}}{\widehat{\pi}_{i(Slow)}} \right) = -39.68 + 0.77 \ \text{Speed}_i$$
+
+.question[
+Calculate the predicted relative risk of Good vs. Slow for a race where the winning speed was 52.5 mph.
+]
+]
+
+
+---
+
+### Class activity
+
+.large[
+.question[
+From this information, can you calculate the predicted *probability* that the condition was Good? If not, what more information do you need?
+]
+]

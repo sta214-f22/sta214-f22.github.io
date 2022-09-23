@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Multinomial logistic regression</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs-2.14/header-attrs.js"></script>
+    <link rel="stylesheet" href="lab-slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Multinomial logistic regression
+]
+
+---
+
+
+### Agenda
+
+.large[
+* No homework this week
+* Extra credit opportunity: department seminar
+  * Dr. Mine Cetinkaya-Rundel
+  * Monday, September 26, 12pm - 1pm in Kirby 120
+* Today: multinomial logistic regression
+]
+
+---
+
+### Motivation
+
+.large[
+* When the response is binary, we use *logistic regression*
+* What happens when the response is categorical, but has MORE than 2 categories?
+* We use *multinomial logistic regression* (aka *multinomial regression*)
+]
+
+---
+
+### Motivation
+
+.large[
+**Question:** What is the relationship between age and contraceptive use for women in Indonesia?
+
+**Data:** 1473 Indonesian couples, with variables
+* `\(Y_i\)` = contraceptive method used (1 = no use, 2 = long-term, 3 = short-term)
+* `\(X_i\)` = Wife's age (numeric)
+]
+
+---
+
+### The response variable
+
+.large[
+
+|Contraception | Freq|
+|:-------------|----:|
+|Long          |  511|
+|None          |  629|
+|Short         |  333|
+
+* `\(n_{None} = 629\)` (this is 42.7% of the couples)
+* `\(n_{Long} = 511\)` (this is 34.7% of the couple)
+* `\(n_{Short} = 333\)` (this is 22.6% of the couples)
+]
+
+---
+
+### The response variable
+
+.large[
+`\(Y_i\)` = contraceptive method used (1 = no use, 2 = long-term, 3 = short-term)
+
+.question[
+What type of variable is `\(Y\)`?
+]
+]
+
+---
+
+### Parametric model building
+
+.large[
+.question[
+What are our two steps in building a parametric model?
+]
+]
+
+---
+
+### Building a distribution
+
+.large[
+`\(Y_i\)` = contraceptive method used (1 = no use, 2 = long-term, 3 = short-term)
+
+.question[
+What notation might we use for the probability of no contraceptive use?
+]
+]
+
+---
+
+### Building a distribution
+
+.large[
+`\(Y_i\)` = contraceptive method used (1 = no use, 2 = long-term, 3 = short-term)
+
+* `\(\pi_{i(None)} = P(Y_i = None)\)`
+* `\(\pi_{i(Short)} = P(Y_i = Short)\)`
+* `\(\pi_{i(Long)} = P(Y_i = Long)\)`
+
+.question[
+What must be true of the three probabilities?
+]
+]
+
+---
+
+### The Categorical distribution
+
+.large[
+.question[
+**Definition:** Let `\(Y_i\)` be an **unordered** categorical variable with `\(J\)` levels `\(j = 1,...,J\)`. Let `\(\pi_j = P(Y_i = j)\)`, where `\(\pi_j \in [0, 1]\)` for all `\(j\)`, and `\(\sum \limits_{j=1}^J \pi_j = 1\)`.
+
+Then we say `\(Y_i \sim Categorical(\pi_1,...,\pi_J)\)`.
+]
+
+* We can use this distribution as the first step in our modeling process!
+
+.question[
+What distribution does our response (contraceptive use) have?
+]
+]
+
+---
+
+### Parametric model building
+
+.large[
+**Step 1: Choose a reasonable distribution for `\(Y\)`**
+
+`$$Y_i \sim Categorical(\pi_{i(None)}, \pi_{i(Short)}, \pi_{i(Long)})$$`
+
+**Step 2: Choose a model for any parameters**
+
+* Need to relate our probabilities to `\(X = Age\)`
+]
+
+---
+
+### EDA
+
+.large[
+&lt;img src="lecture_14_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+### EDA
+
+.large[
+* Boxplots show there may be some differences with age, but don't let us model the relationship
+* We want something like an empirical log odds plot
+
+.question[
+Can we use the log odds here?
+]
+]
+---
+
+### Relative risk
+
+.large[
+* If `\(Y_i\)` is *binary*, the odds `\(\dfrac{\pi_i}{1 - \pi_i}\)` compare the probabilities of the two possible outcomes
+* If `\(Y_i\)` has more than two outcomes, we need to generalize the odds
+* The *relative risk* compares the probabilities of two potential outcomes
+
+**Relative risk of long term vs. no contraceptive use:**
+
+&lt;br/&gt;
+
+**Relative risk of short term vs. no contraceptive use:**
+]
+
+---
+
+### Example
+
+.large[
+Consider the 48 twenty-one year old wives in our data:
+
+* Long: 23
+* Short: 6
+* None: 19
+
+.question[
+For a 21 year old, what is the *empirical* relative risk of using long term vs. short term contraceptives?
+]
+]
+
+---
+
+### Relative risk
+
+.large[
+.question[
+**Definition:** Let `\(Y_i\)` be a categorical variable with `\(J\)` levels `\(j=1,...,J\)`. Let `\(\pi_j = P(Y_i = j)\)`. Then the relative risk of level `\(j\)` vs. level `\(k\)` is 
+
+`$$\dfrac{\pi_{ij}}{\pi_{ik}}$$`
+]
+]
+
+---
+
+### Class activity, Part I
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_14.html](https://sta214-f22.github.io/class_activities/ca_lecture_14.html)
+]
+
+---
+
+### Class activity
+
+.large[
+
+| Speed Range | Slow | Good | Fast | Total |
+| --- | --- | --- | --- | --- |
+| `\((50, 51)\)` | 5 | 1 | 0 | 6 |
+| `\((51, 52)\)` | 5 | 5 | 3 | 13 |
+| `\((52, 53)\)` | 6 | 12 | 2 | 20 |
+| `\((53, 54)\)` | 5 | 31 | 4 | 40 |
+
+.question[
+    What is the relative risk of Good vs. Slow for the `\((52,53)\)` speed group?
+]
+]
+
+
+---
+
+### Class activity
+
+.large[
+.question[
+How would you interpret the relative risk of Good vs. Slow for the `\((52, 53)\)` speed group?
+]
+]
+  
+---
+
+### Log relative risk
+
+.large[
+Instead of modeling the log odds, we can model the *log relative risk*
+]
+
+&lt;img src="lecture_14_files/figure-html/unnamed-chunk-3-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Log relative risk
+
+.large[
+Instead of modeling the log odds, we can model the *log relative risk*
+]
+
+&lt;img src="lecture_14_files/figure-html/unnamed-chunk-4-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Multinomial regression model
+
+.large[
+**Step 1: Choose a reasonable distribution for `\(Y\)`**
+
+`$$Y_i \sim Categorical(\pi_{i(None)}, \pi_{i(Short)}, \pi_{i(Long)})$$`
+**Step 2: Choose a model for any parameters**
+
+`$$\log \left( \dfrac{\pi_{i(Long)}}{\pi_{i(None)}} \right) = \beta_{0(Long)} + \beta_{1(Long)} Age_i$$`
+`$$\log \left( \dfrac{\pi_{i(Short)}}{\pi_{i(None)}} \right) = \beta_{0(Short)} + \beta_{1(Short)} Age_i$$`
+* Pick a *reference* or *baseline* category to compare to (here it is None)
+]
+
+---
+
+### Multinomial regression model
+
+.large[
+**Step 1: Choose a reasonable distribution for `\(Y\)`**
+
+`$$Y_i \sim Categorical(\pi_{i(None)}, \pi_{i(Short)}, \pi_{i(Long)})$$`
+**Step 2: Choose a model for any parameters**
+
+`$$\log \left( \dfrac{\pi_{i(Long)}}{\pi_{i(None)}} \right) = \beta_{0(Long)} + \beta_{1(Long)} Age_i$$`
+`$$\log \left( \dfrac{\pi_{i(Short)}}{\pi_{i(None)}} \right) = \beta_{0(Short)} + \beta_{1(Short)} Age_i$$`
+
+.question[
+From the empirical log relative risk plots, did it look like the log relative risk was a linear function of Age?
+]
+]
+
+---
+
+### Log relative risk
+
+&lt;img src="lecture_14_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Multinomial regression model
+
+.large[
+**Step 1: Choose a reasonable distribution for `\(Y\)`**
+
+`$$Y_i \sim Categorical(\pi_{i(None)}, \pi_{i(Short)}, \pi_{i(Long)})$$`
+**Step 2: Choose a model for any parameters**
+
+`$$\log \left( \dfrac{\pi_{i(Long)}}{\pi_{i(None)}} \right) = \beta_{0(Long)} + \beta_{1(Long)} Age_i + \beta_{2(Long)} Age_i^2$$`
+`$$\log \left( \dfrac{\pi_{i(Short)}}{\pi_{i(None)}} \right) = \beta_{0(Short)} + \beta_{1(Short)} Age_i + \beta_{2(Short)} Age_i^2$$`
+]
+
+---
+
+### Estimated model
+
+.large[
+`$$\log \left( \dfrac{\widehat{\pi}_{i(Long)}}{\widehat{\pi}_{i(None)}} \right) = -5.07 + 0.37 Age_i - 0.0063 Age_i^2$$`
+
+`$$\log \left( \dfrac{\widehat{\pi}_{i(Short)}}{\widehat{\pi}_{i(None)}} \right) = -8.21 + 0.46 Age_i - 0.0065 Age_i^2$$`
+
+.question[
+What is the predicted relative risk of long term vs. none for a woman age 30?
+]
+]
+
+---
+
+### Class activity, Part II
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_14.html](https://sta214-f22.github.io/class_activities/ca_lecture_14.html)
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+Write down the population multinomial regression model, using Slow as the reference category, and assuming that the log relative risk is a linear function of Speed.
+]
+]
+
+---
+
+### Class activity
+
+.large[
+`$$\log \left( \dfrac{\widehat{\pi}_{i(Good)}}{\widehat{\pi}_{i(Slow)}} \right) = -39.68 + 0.77 \ \text{Speed}_i$$`
+
+.question[
+Calculate the predicted relative risk of Good vs. Slow for a race where the winning speed was 52.5 mph.
+]
+]
+
+
+---
+
+### Class activity
+
+.large[
+.question[
+From this information, can you calculate the predicted *probability* that the condition was Good? If not, what more information do you need?
+]
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
