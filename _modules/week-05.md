@@ -12,5 +12,6 @@ September 21
 
 September 23
 : Introduction to multinomial regression
+  : [Slides](https://sta214-f22.github.io/slides/lecture_14.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture_14.html)
 
 : **Lab 3 due**{: .label .label-red }
