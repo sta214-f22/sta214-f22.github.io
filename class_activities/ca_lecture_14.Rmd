@@ -1,0 +1,40 @@
+---
+title: "Class Activity, September 23"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+## Setup
+
+We have data on $n = 79$ Kentucky Derby races. Let $Y$ = condition, meaning the condition of race trace for each race, where the choices for track condition are fast, good, and slow. We want to explore the relationship between $X$ = winning speed (Speed) and $Y$ = track condition (Condition)
+
+# Part I
+
+1. In the table below, the data have been divided into 4 speed groups. For each speed group, we count how many races were run at each track condition. What is the relative risk of Good vs. Slow for the [52,53) speed group?
+
+| Speed Range | Slow | Good | Fast | Total |
+| --- | --- | --- | --- | --- |
+| $[50, 51)$ | 5 | 1 | 0 | 6 |
+| $[51, 52)$ | 5 | 5 | 3 | 13 |
+| $[52, 53)$ | 6 | 12 | 2 | 20 |
+| $[53, 54)$ | 5 | 31 | 4 | 40 |
+
+2. Interpret the relative risk of Good vs. Slow for the [52, 53) speed group.
+
+# Part II
+
+We now fit a multinomial regression model with Speed as the predictor, and Condition as the response.
+
+3. Write down the population multinomial regression model, using Slow as the reference category, and assuming that the log relative risk is a linear function of Speed.
+
+For Good vs. Slow, the fitted model is 
+
+$\log \left( \dfrac{\widehat{\pi}_{i(Good)}}{\widehat{\pi}_{i(Slow)}} \right) = -39.68 + 0.77 \ \text{Speed}_i$
+
+4. Calculate the predicted relative risk of Good vs. Slow for a race where the winning speed was 52.5 mph.
+
+5. From this information, can you calculate the predicted *probability* that the condition was Good? If not, what more information do you need?
