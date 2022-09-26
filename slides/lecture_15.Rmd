@@ -1,0 +1,502 @@
+---
+title: More multinomial regression
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+### Motivation
+
+.large[
+**Question:** What is the relationship between age and contraceptive use for women in Indonesia?
+
+**Data:** 1473 Indonesian couples, with variables
+* $Y_i$ = contraceptive method used (1 = no use, 2 = long-term, 3 = short-term)
+* $X_i$ = Wife's age (numeric)
+]
+
+---
+
+### EDA: log relative risk
+
+```{r echo=F, message=F, warning=F, fig.width=7, fig.height=5, fig.align='center'}
+library(tidyverse)
+library(nnet)
+library(knitr)
+
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+   lines <- options$output.lines
+   if (is.null(lines)) {
+     return(hook_output(x, options))  # pass to default hook
+   }
+   x <- unlist(strsplit(x, "\n"))
+   more <- "..."
+   if (length(lines)==1) {        # first n lines
+     if (length(x) > lines) {
+       # truncate the output, but add ....
+       x <- c(head(x, lines), more)
+     }
+   } else {
+     x <- c(more, x[lines], more)
+   }
+   # paste these lines together
+   x <- paste(c(x, ""), collapse = "\n")
+   hook_output(x, options)
+ })
+
+cmc_data <- read_csv("cmc.data.txt", col_names = F)
+colnames(cmc_data) <-c("WifeAge", "WifeEdu", "HusbandEdu", "NumChild", "WifeRel", "WifeWork", "HusbandOcc","Living", "Media", "Choice")
+cmc_data$Choice <- ifelse( cmc_data$Choice == 1, "None", ifelse(cmc_data$Choice==2, "Short", "Long"))
+cmc_data <- cmc_data %>%
+  mutate(Choice = factor(Choice, levels=c("None", "Short", "Long")))
+cmc_data %>%
+  group_by(WifeAge) %>%
+  summarize(count_long = sum(Choice == "Long"),
+            count_none = sum(Choice == "None")) %>%
+  mutate(log_rr = log(count_long/count_none)) %>%
+  ggplot(aes(x = WifeAge, y = log_rr)) +
+  geom_point(size=2) +
+  labs(x = "Wife's Age", y = "Log RR: Long vs. None") +
+  theme_bw() +
+  theme(text = element_text(size=25))
+```
+
+---
+
+### EDA: log relative risk
+
+```{r echo=F, fig.width=7, fig.height=5, fig.align='center'}
+cmc_data %>%
+  group_by(WifeAge) %>%
+  summarize(count_long = sum(Choice == "Short"),
+            count_none = sum(Choice == "None")) %>%
+  mutate(log_rr = log(count_long/count_none)) %>%
+  ggplot(aes(x = WifeAge, y = log_rr)) +
+  geom_point(size=2) +
+  labs(x = "Wife's Age", y = "Log RR: Short vs. None") +
+  theme_bw() +
+  theme(text = element_text(size=25))
+```
+
+---
+
+### Multinomial regression model
+
+.large[
+**Step 1: Choose a reasonable distribution for $Y$**
+
+$$Y_i \sim Categorical(\pi_{i(None)}, \pi_{i(Short)}, \pi_{i(Long)})$$
+**Step 2: Choose a model for any parameters**
+
+$$\log \left( \dfrac{\pi_{i(Long)}}{\pi_{i(None)}} \right) = \beta_{0(Long)} + \beta_{1(Long)} Age_i + \beta_{2(Long)} Age_i^2$$
+$$\log \left( \dfrac{\pi_{i(Short)}}{\pi_{i(None)}} \right) = \beta_{0(Short)} + \beta_{1(Short)} Age_i + \beta_{2(Short)} Age_i^2$$
+]
+
+---
+
+### Fitting the model in R
+
+.large[
+* To fit a multinomial regression, we use the `nnet` package
+
+```r
+library(nnet)
+```
+
+* Syntax is very similar to other regression techniques
+
+```r
+m1 <- multinom(Choice ~ WifeAge + I(WifeAge^2), 
+               data = cmc_data)
+```
+]
+
+---
+
+### Fitting the model in R
+
+.large[
+When you fit the model, you get the following output:
+
+```{r}
+m1 <- multinom(Choice ~ WifeAge + I(WifeAge^2), 
+               data = cmc_data)
+```
+
+* This reflects the process used to estimate the model parameters -- we won't get into that here
+]
+
+---
+
+### Fitting the model in R
+
+.large[
+```{r}
+summary(m1)
+```
+]
+
+---
+
+### Fitting the model in R
+
+.large[
+```{r, echo=F, output.lines=4:7}
+summary(m1)
+```
+]
+
+.large[
+.question[
+What is the fitted model for short term vs. no contraceptive use?
+]
+]
+
+---
+
+### Class activity, Part I
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_15.html](https://sta214-f22.github.io/class_activities/ca_lecture_15.html)
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+What is the predicted relative risk of short term use vs. no use use for a woman aged 25?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+What is the predicted *probability* of each contraceptive choice for a woman aged 25?
+]
+]
+
+---
+
+### Generalizing
+
+.large[
+Let $Y_i \sim Categorical(\pi_{i1}, ..., \pi_{iJ})$ be a categorical variable with $J$ levels, and let $j^*$ be the reference level. For each $\pi_{ij}$, $j \neq j^*$, we model
+
+$$\log \left( \dfrac{\pi_{ij}}{\pi_{ij^*}} \right) = \beta_{0(j)} + \beta_{1(j)} X_i$$
+Then $\pi_{ij} = \pi_{ij^*} \exp\{ \beta_{0(j)} + \beta_{1(j)} X_i \}$, so
+
+$$\pi_{ij^*} = \dfrac{1}{1 + \sum_{j \neq j^*} \exp\{ \beta_{0(j)} + \beta_{1(j)} X_i \} }$$
+$$\pi_{ij} = \dfrac{\exp\{ \beta_{0(j)} + \beta_{1(j)} X_i \}}{1 + \sum_{j \neq j^*} \exp\{ \beta_{0(j)} + \beta_{1(j)} X_i \} }$$
+]
+
+---
+
+### Predicted probabilities in R
+
+.large[
+We can obtain the predicted probabilities for each individual in the data:
+
+```{r}
+probspred <- fitted(m1)
+```
+
+Here are the predicted probabilities for the second individual:
+
+```{r}
+probspred[2,]
+```
+]
+
+---
+
+### Making predictions
+
+.large[
+```{r}
+probspred[2,]
+```
+
+This is a 24 year old woman who does not use contraceptives.
+
+.question[
+How well did we do at estimating their chances of using contraception?
+]
+]
+
+---
+
+### Making predictions
+
+.large[
+```{r echo=F}
+probspred[2,]
+```
+
+This is a 24 year old woman who does not use contraceptives.
+
+.question[
+What would our predicted probabilities be if we were just guessing?
+]
+]
+
+---
+
+### Making predictions
+
+.large[
+```{r echo=F}
+probspred[2,]
+```
+
+This is a 24 year old woman who does not use contraceptives.
+]
+
+.large[
+* If we don't have any data, our estimated probability would be 1/3 for each level
+* If we have data but we don't use age, our estimated probability for each level is just the proportion of observations in that group:
+
+```{r}
+table(cmc_data$Choice)/nrow(cmc_data)
+```
+]
+
+---
+
+### Making predictions
+
+.large[
+```{r echo=F}
+probspred[2,]
+```
+
+This is a 24 year old woman who does not use contraceptives.
+]
+
+.large[
+.question[
+For this individual, are we doing better than random guessing?
+]
+]
+
+---
+
+### Making predictions
+
+.large[
+.question[
+Given predicted probabilities $\widehat{\pi}_{ij}$ for individual $i$, how could I predict the response $\widehat{Y}_i$?
+]
+]
+
+---
+
+### Making predictions
+
+.large[
+```{r}
+probspred <- fitted(m1)
+probspred[2,]
+
+preds <- predict(m1)
+preds[2]
+```
+]
+
+---
+
+### Making predictions
+
+.large[
+.question[
+How can I assess all of my predictions at once?
+]
+]
+
+---
+
+### Making predictions
+
+.large[
+.question[
+How can I assess all of my predictions at once?
+]
+]
+
+.large[
+With a confusion matrix!
+
+```{r}
+table("Prediction" = preds, 
+      "Actual" = cmc_data$Choice)
+```
+]
+
+---
+
+### Making predictions
+
+.large[
+```{r echo=F}
+table("Prediction" = preds, 
+      "Actual" = cmc_data$Choice)
+```
+
+.question[
+Does it look like we're doing a good job at predicting contraception use?
+]
+]
+
+---
+
+### Class activity, Part II
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_15.html](https://sta214-f22.github.io/class_activities/ca_lecture_15.html)
+]
+
+---
+
+### Class activity
+
+.large[
+```{r echo=F}
+table("Prediction" = preds, 
+      "Actual" = cmc_data$Choice)
+```
+
+.question[
+What fraction of our predictions are correct?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+What would our confusion matrix look like if our predictions randomly assigned each person to one of the three categories, with a 1/3 chance for each category?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+What would our confusion matrix look like if our predictions randomly assigned each person to one of the three categories, with a 1/3 chance for each category?
+]
+]
+
+.large[
+Something like 
+
+| | | Actual | | |
+| --- | --- | --- | --- | --- |
+| | | None | Short | Long |
+|Predicted | None | 210 | 111 | 170 |
+| | Short | 210 | 111 | 170 |
+| | Long | 209 | 111 | 171 |
+
+]
+
+---
+
+### Class activity
+
+.large[
+
+| | | Actual | | |
+| --- | --- | --- | --- | --- |
+| | | None | Short | Long |
+|Predicted | None | 210 | 111 | 170 |
+| | Short | 210 | 111 | 170 |
+| | Long | 209 | 111 | 171 |
+
+.question[
+What is the accuracy of our predictions in this confusion matrix?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+What would our confusion matrix look like if for every individual, we just predicted the most common contraception choice in the data?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+What would our confusion matrix look like if for every individual, we just predicted the most common contraception choice in the data?
+]
+]
+
+.large[
+The most common choice is None, so
+
+| | | Actual | | |
+| --- | --- | --- | --- | --- |
+| | | None | Short | Long |
+|Predicted | None | 629 | 333 | 511 |
+| | Short | 0 | 0 | 0 |
+| | Long | 0 | 0 | 0 |
+
+]
+
+---
+
+### Class activity
+
+.large[
+
+| | | Actual | | |
+| --- | --- | --- | --- | --- |
+| | | None | Short | Long |
+|Predicted | None | 629 | 333 | 511 |
+| | Short | 0 | 0 | 0 |
+| | Long | 0 | 0 | 0 |
+
+.question[
+What is the accuracy of our predictions in this confusion matrix?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+Do we do better than random guessing?
+]
+]
+
+---
+
+### Moral
+
+.large[
+* By itself, accuracy isn't particularly useful for summarizing prediction performance
+* We need to look at predictive ability for each class
+]
