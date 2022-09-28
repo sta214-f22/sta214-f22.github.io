@@ -1,0 +1,375 @@
+---
+title: Prediction and hypothesis testing
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+### Data
+
+.large[
+**Question:** What is the relationship between age and contraceptive use for women in Indonesia?
+
+**Data:** 1473 Indonesian couples, with variables
+* $Y_i$ = contraceptive method used (1 = no use, 2 = long-term, 3 = short-term)
+* $X_i$ = Wife's age (numeric)
+]
+
+---
+
+### Last time: Fitted model
+
+.large[
+$$\log \left( \dfrac{\widehat{\pi}_{i(Short)}}{\widehat{\pi}_{i(None)}} \right) = -8.234 + 0.456 Age_i - 0.0065 Age_i^2$$
+
+$$\log \left( \dfrac{\widehat{\pi}_{i(Long)}}{\widehat{\pi}_{i(None)}} \right) = -5.083 + 0.366 Age_i - 0.00628 Age_i^2$$
+]
+
+---
+
+### Last time: Predictions
+
+.large[
+```{r include=F}
+library(tidyverse)
+library(nnet)
+library(knitr)
+
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+   lines <- options$output.lines
+   if (is.null(lines)) {
+     return(hook_output(x, options))  # pass to default hook
+   }
+   x <- unlist(strsplit(x, "\n"))
+   more <- "..."
+   if (length(lines)==1) {        # first n lines
+     if (length(x) > lines) {
+       # truncate the output, but add ....
+       x <- c(head(x, lines), more)
+     }
+   } else {
+     x <- c(more, x[lines], more)
+   }
+   # paste these lines together
+   x <- paste(c(x, ""), collapse = "\n")
+   hook_output(x, options)
+ })
+
+cmc_data <- read_csv("../slides/cmc.data.txt", col_names = F)
+colnames(cmc_data) <-c("WifeAge", "WifeEdu", "HusbandEdu", "NumChild", "WifeRel", "WifeWork", "HusbandOcc","Living", "Media", "Choice")
+cmc_data$Choice <- ifelse( cmc_data$Choice == 1, "None", ifelse(cmc_data$Choice==2, "Short", "Long"))
+cmc_data <- cmc_data %>%
+  mutate(Choice = factor(Choice, levels=c("None", "Short", "Long")))
+
+m1 <- multinom(Choice ~ WifeAge + I(WifeAge^2), 
+               data = cmc_data)
+```
+
+```{r echo=F}
+preds <- predict(m1)
+table("Prediction" = preds, 
+      "Actual" = cmc_data$Choice)
+```
+
+.question[
+How good are our predictions?
+]
+
+]
+
+---
+
+### Last time: Predictions
+
+.large[
+
+```{r echo=F}
+table("Prediction" = preds, 
+      "Actual" = cmc_data$Choice)
+```
+
+We can also assess our predictions by comparing to random guessing.
+
+.question[
+What are our predicted probabilities for each observation from random guessing?
+]
+
+]
+
+---
+
+### Random guessing
+
+.large[
+* If we don't have any data, our estimated probability would be 1/3 for each level
+* If we have data but we don't use age, our estimated probability for each level is just the proportion of observations in that group:
+
+```{r}
+table(cmc_data$Choice)/nrow(cmc_data)
+```
+]
+
+---
+
+### Class activity
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_16.html](https://sta214-f22.github.io/class_activities/ca_lecture_16.html)
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+What would our confusion matrix look like if our predictions randomly assigned each person to one of the three categories, with a 1/3 chance for each category?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+What would our confusion matrix look like if our predictions randomly assigned each person to one of the three categories, with a 1/3 chance for each category?
+]
+]
+
+.large[
+Something like 
+
+| | | Actual | | |
+| --- | --- | --- | --- | --- |
+| | | None | Short | Long |
+|Predicted | None | 210 | 111 | 170 |
+| | Short | 210 | 111 | 170 |
+| | Long | 209 | 111 | 171 |
+
+]
+
+---
+
+### Class activity
+
+.large[
+
+| | | Actual | | |
+| --- | --- | --- | --- | --- |
+| | | None | Short | Long |
+|Predicted | None | 210 | 111 | 170 |
+| | Short | 210 | 111 | 170 |
+| | Long | 209 | 111 | 171 |
+
+.question[
+What is the accuracy of our predictions in this confusion matrix?
+]
+]
+
+
+---
+
+### Class activity
+
+.large[
+.question[
+What would our confusion matrix look like if for every individual, we just predicted the most common contraception choice in the data?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+What would our confusion matrix look like if for every individual, we just predicted the most common contraception choice in the data?
+]
+]
+
+.large[
+The most common choice is None, so
+
+| | | Actual | | |
+| --- | --- | --- | --- | --- |
+| | | None | Short | Long |
+|Predicted | None | 629 | 333 | 511 |
+| | Short | 0 | 0 | 0 |
+| | Long | 0 | 0 | 0 |
+
+]
+
+---
+
+### Class activity
+
+.large[
+
+| | | Actual | | |
+| --- | --- | --- | --- | --- |
+| | | None | Short | Long |
+|Predicted | None | 629 | 333 | 511 |
+| | Short | 0 | 0 | 0 |
+| | Long | 0 | 0 | 0 |
+
+.question[
+What is the accuracy of our predictions in this confusion matrix?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+Do we do better than random guessing?
+]
+]
+
+---
+
+### Moral
+
+.large[
+* By itself, accuracy isn't particularly useful for summarizing prediction performance
+* It is helpful to interpret accuracy in relation to simple random guessing. Our model isn't very good if we can't beat a random guess
+* We also need to look at predictive ability for each class
+]
+
+---
+
+### Hypothesis testing
+
+.large[
+**Research question:** Is there a relationship between age and contraceptive choice?
+
+.question[
+What are my steps to answer this question with a hypothesis test?
+]
+]
+
+---
+
+### Specify hypotheses
+
+.large[
+**Research question:** Is there a relationship between age and contraceptive choice?
+
+$$\log \left( \dfrac{\pi_{i(Long)}}{\pi_{i(None)}} \right) = \beta_{0(Long)} + \beta_{1(Long)} Age_i + \beta_{2(Long)} Age_i^2$$
+
+$$\log \left( \dfrac{\pi_{i(Short)}}{\pi_{i(None)}} \right) = \beta_{0(Short)} + \beta_{1(Short)} Age_i + \beta_{2(Short)} Age_i^2$$
+
+.question[
+What should our null and alternative hypotheses be?
+]
+
+]
+
+---
+
+### Specify hypotheses
+
+.large[
+$$\log \left( \dfrac{\pi_{i(Long)}}{\pi_{i(None)}} \right) = \beta_{0(Long)} + \beta_{1(Long)} Age_i + \beta_{2(Long)} Age_i^2$$
+
+$$\log \left( \dfrac{\pi_{i(Short)}}{\pi_{i(None)}} \right) = \beta_{0(Short)} + \beta_{1(Short)} Age_i + \beta_{2(Short)} Age_i^2$$
+
+$H_0: \beta_{1(Short)} = \beta_{2(Short)} = \beta_{1(Long)} = \beta_{2(Long)} = 0$
+
+$H_A: \text{at least one of } \beta_{1(Short)}, \beta_{2(Short)}, \beta_{1(Long)}, \beta_{2(Long)} \neq 0$
+
+.question[
+What are the full and reduced models?
+]
+]
+
+---
+
+### Test statistic
+
+.large[
+.question[
+What test can I use to compare nested models?
+]
+]
+
+---
+
+### Drop in deviance
+
+.large[
+```{r include=F}
+m1 <- multinom(Choice ~ WifeAge + I(WifeAge^2), 
+               data = cmc_data)
+```
+
+```{r eval=F}
+m1 <- multinom(Choice ~ WifeAge + I(WifeAge^2), 
+               data = cmc_data)
+```
+
+```{r output.lines = 13:14}
+summary(m1)
+```
+
+Deviance for full model: 3015.821
+
+.question[
+How would we fit the reduced model in R?
+]
+]
+---
+
+### Drop in deviance
+
+.large[
+```{r eval=F}
+m0 <- multinom(Choice ~ 1, 
+               data = cmc_data)
+```
+
+```{r include=F}
+m0 <- multinom(Choice ~ 1, 
+               data = cmc_data)
+```
+
+```{r output.lines = 13:14}
+summary(m0)
+```
+
+Reduced model deviance: 3142.726
+
+Drop in deviance: $G = 3142.726 - 3015.821 = 126.905$
+
+.question[
+What distribution do we use to calculate the p-value?
+]
+]
+
+---
+
+### Calculating a p-value
+
+.large[
+
+Under $H_0$, $G \sim \chi^2_q$, where $q$ is the number of parameters tested.
+
+Here $q = 4$ (2 parameters for each log relative risk model)
+
+```{r}
+pchisq(126.905, df=4, lower.tail=F)
+```
+
+So we have very strong evidence that there is a relationship between age and contraceptive choice.
+]
+

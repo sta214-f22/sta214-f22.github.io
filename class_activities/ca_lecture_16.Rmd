@@ -1,0 +1,48 @@
+---
+title: "Class Activity, September 28"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+We'll continue analyzing the Indonesian contraception choice data that we were using in the slides.
+
+Here is the confusion matrix for predictions from our fitted model:
+
+```{r include=F}
+library(tidyverse)
+library(nnet)
+library(knitr)
+
+cmc_data <- read_csv("../slides/cmc.data.txt", col_names = F)
+colnames(cmc_data) <-c("WifeAge", "WifeEdu", "HusbandEdu", "NumChild", "WifeRel", "WifeWork", "HusbandOcc","Living", "Media", "Choice")
+cmc_data$Choice <- ifelse( cmc_data$Choice == 1, "None", ifelse(cmc_data$Choice==2, "Short", "Long"))
+cmc_data <- cmc_data %>%
+  mutate(Choice = factor(Choice, levels=c("None", "Short", "Long")))
+
+m1 <- multinom(Choice ~ WifeAge + I(WifeAge^2), 
+               data = cmc_data)
+```
+
+```{r echo=F}
+preds <- predict(m1)
+table("Prediction" = preds, 
+      "Actual" = cmc_data$Choice)
+```
+
+1. What fraction of our predictions are correct? (i.e., what is the *accuracy* of our predictions)
+
+In the slides, we compared our predicted probabilities to random guessing. There were two ways we might randomly guess: without the data (assign a 1/3 chance of each contraception choice to every individual), or with the data (the probability of each choice is just the prevalence of that choice in the data).
+
+2. What would our confusion matrix look like if our predictions randomly assigned each person to one of the three categories, with a 1/3 chance for each category?
+
+3. What is the accuracy of our predictions in the confusion matrix for exercise 2?
+
+4. What would our confusion matrix look like if for every individual, we just predicted the most common contraception choice in the data?
+
+5. What is the accuracy of our predictions in the confusion matrix for exercise 4?
+
+6. Does our model (with Age as a predictor) do better than random guessing?
