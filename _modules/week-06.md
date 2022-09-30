@@ -12,5 +12,7 @@ September 28
 
 September 30
 : **Lab**{: .label .label-purple } Lab 4
+  : [Lab 4](https://sta214-f22.github.io/labs/lab_4.html)
 
 : **Project 1 released**{: .label .label-green }
+  : [Project 1](https://sta214-f22.github.io/projects/project_1.html)

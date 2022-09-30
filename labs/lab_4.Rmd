@@ -1,0 +1,282 @@
+---
+title: "Lab 4"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday, October 7, 12:00pm (noon) on Canvas
+
+A template R Markdown file is provided: [lab_04_template.Rmd](https://sta214-f22.github.io/labs/lab_04_template.Rmd)
+
+When you are done with the lab, submit your knitted HTML file to Canvas.
+
+# Data
+
+Today, we are going to work with a data set from [DrivenData](https://www.drivendata.org/competitions/57/nepal-earthquake/page/134/), an online data competition site that hosts competitions aimed at improving education, health, safety, and general well being for individuals around the world.
+
+Our data today come from the 2015 Gorkha earthquake in Nepal. After the earthquake, a large scale survey was conducted to determine the amount of damage the earthquake caused for homes, businesses and other structures. This is one of the largest post-disaster surveys in the world, and today we will be using it to determine what characteristics were associated with different levels of building damage. Can we determine factors that are associated with completely demolished structures, or with buildings that were not damaged at all?
+
+We have 39 different variables in this data set, some categorical and some numeric. The meaning of each variable is given [here](https://www.drivendata.org/competitions/57/nepal-earthquake/page/136/). Today, we will only focus on a few.
+
+## Loading the data
+
+The `earthquake` data can be loaded into R with the following command:
+
+```r
+earthquake <- read.csv("https://sta214-f22.github.io/labs/EarthquakeData.csv")
+```
+
+# Part I: Earthquake Data
+
+Our goal today is to determine what features might be related to the amount of destruction a building sustained during the earthquake. The response variable is `Damage`, and it has three levels: none, moderate, and severe. None means there was minimal or no damage, "moderate" means there was moderate damage, and "severe" means the building was basically destroyed.
+
+### EDA: Damage
+
+:::{.question}
+#### Question 1
+
+Make an appropriate graph *and* a professionally formatted table to explore the distribution of the response variable. Label your figure Figure 1.
+
+:::
+
+:::{.question}
+#### Question 2
+
+What percent of the buildings in the data were in each damage category?
+
+:::
+
+Why do these counts matter? Well, multinomial regression does not work well if any of the categories are too small. It works best when all the levels of the response variable have roughly the same number of rows in the data, but that rarely happens. We run into trouble if any of the categories are too small. Generally, we want our smallest category to have approximately 10% of the rows.
+
+Now that we can see the counts, let's choose our baseline level (also known as the reference level). By default, R typically chooses the level which comes first alphabetically to be the baseline level. To choose a different baseline, we can make `Damage` a `factor` variable in R, and specify the levels in order (the first is our baseline).
+
+For example, to make "none" the baseline we could use
+
+```r
+earthquake <- earthquake %>%
+  mutate(Damge = factor(Damage, levels = c("none", "moderate", "severe")))
+```
+
+There are two ways to choose the baseline.We can choose a level that makes sense as a reference level in our analysis, like something that is the "standard" value. This makes interpretation nice because we are comparing the log relative risk of something happening versus the standard thing happening.
+
+However, we run into problems with this if the category that makes sense as our baseline is the smallest category. The smallest category is the hardest for our model to work with, and so is not necessarily what we want as our reference level.
+
+In these cases, we generally choose whichever category is the largest as our baseline. This has some nice mathematical properties since the largest group is being used as the reference level to estimate both lines.
+
+:::{.question}
+#### Question 3
+
+What level do you think we should use for the baseline? If necessary, use code to tell R that this is the level you want for the baseline.
+
+:::
+
+### EDA: Age
+
+Our task now is to explore what might be related to a building having severe damage versus moderate damage, or none versus moderate damage. This helps with planning and preparation in case of another disaster.
+
+When we think about why some buildings were damaged more than others, one of the first things we might think about exploring is the age of the building. What is the relationship between the age of the building (X) and the damage (Y)?
+
+Because we are thinking about regression modeling, we need to be able to check the shape of the relationship between age and the log relative risk. This will help us decide on the form of our model. This requires a new plot...and some new code.
+
+Because log relative risks are very similar to log odds, we can adapt the `logodds_plot` function from Lab 3 to create empirical log relative risk plots. The `log_rr_plot` function below is mostly complete, and it works like the `logodds_plot` function. The only difference is we have added two arguments: `cat_num` (which category is in the numerator of the relative risk), and `cat_denom` (which category is in the denominator of the relative risk).
+
+```r
+log_rr_plot <- function(data, num_bins, bin_method,
+                         x, y, cat_num, cat_denom,
+                         grouping = NULL, reg_formula = y ~ x){
+  
+  if(is.null(grouping)){
+    dat <- data.frame(x = data[,x], 
+                      y = data[,y],
+                      group = 1)
+  } else {
+    dat <- data.frame(x = data[,x], 
+                      y = data[,y],
+                      group = data[,grouping])
+  }
+  
+  dat <- dat %>%
+    filter(y %in% c(cat_num, cat_denom)) %>%
+    mutate(obs = ifelse(y == cat_num, 1, 0))
+  
+  
+  if(bin_method == "equal_size"){
+    logodds_table <- dat %>%
+      slice_sample(n = nrow(dat), replace=F) %>%
+      drop_na() %>%
+      arrange(group, x) %>%
+      group_by(group) %>%
+      mutate(bin = rep(1:num_bins,
+                       each=ceiling(n()/num_bins))[1:n()]) %>%
+      group_by(bin, group) %>%
+      summarize(mean_x = mean(x),
+                prop = mean(c(obs, 0.5)),
+                num_obs = n()) %>%
+      ungroup() %>%
+      mutate(logodds = log(prop/(1 - prop)))
+  } else {
+    logodds_table <- dat %>%
+      slice_sample(n = nrow(dat), replace=F) %>%
+      drop_na() %>%
+      group_by(group) %>%
+      mutate(bin = cut(x, 
+                       breaks = num_bins,
+                       labels = F)) %>%
+      group_by(bin, group) %>%
+      summarize(mean_x = mean(x),
+                prop = mean(c(obs, 0.5)),
+                num_obs = n()) %>%
+      ungroup() %>%
+      mutate(logodds = log(prop/(1 - prop)))
+  }
+  
+  if(is.null(grouping)){
+    logodds_table %>%
+      ggplot(aes(x = mean_x,
+                 y = logodds)) +
+      geom_point(size=2.5) +
+      geom_smooth(se=F, method="lm", formula = reg_formula) +
+      theme_bw() +
+      labs(x = x,
+           y = paste("Log RR", cat_num, "vs.", cat_denom)) +
+      theme(text = element_text(size=15))
+  } else {
+    logodds_table %>%
+      ggplot(aes(x = mean_x,
+                 y = logodds,
+                 color = group,
+                 shape = group)) +
+      geom_point(size=2.5) +
+      geom_smooth(se=F, method="lm", formula = reg_formula) +
+      theme_bw() +
+      labs(x = x,
+           y = paste("Log RR", cat_num, "vs.", cat_denom),
+           color = grouping,
+           shape = grouping) +
+      theme(text = element_text(size=15))
+  }
+  
+}
+```
+
+:::{.question}
+#### Question 4
+
+Create two empirical log relative risk plots: one to explore the relationship between age and the log relative risk of no damage vs. moderate, and one to explore the relationship between age and the log relative risk of severe damage vs. moderate. Add a second order polynomial to both plots. Below is code for one of these plots:
+
+```{r eval=F}
+log_rr_plot(earthquake, 20, "equal_size", 
+            x = "age", y = "Damage", 
+            cat_num = "none", cat_denom = "moderate", 
+            reg_formula = y ~ poly(x, 2))
+```
+
+:::
+
+### Modeling
+
+:::{.question}
+#### Question 5
+
+Based on the transformation I suggested for Age (the second order polynomial), write down Step 1 and Step 2 for building a parametric model for damage grade. This should be the population model form (so no hats!).
+
+:::
+
+:::{.question}
+#### Question 6
+
+Fit the model from question 6, using the `multinom` function in the `nnet` package. Write down the fitted regression line(s) using appropriate notation. *Note: when fitting a second order polynomial for age, use* `poly(age, 2, raw=TRUE)`.
+
+:::
+
+:::{.question}
+#### Question 7
+
+Calculate the predicted probability of severe damage for a building 10 years old. Show all work.
+
+:::
+
+Finally, let's visualize our fitted model. We can plot how the probabilities of different categories of damage change with age. We need another function to help us with this.
+
+```r
+plot_probsMultinom <- function(model, data, xvar){
+  probs <- fitted(model)
+  levels <- colnames(probs)
+  dat <- cbind(data.frame(x = data[,xvar]), probs) %>%
+    pivot_longer(!x, names_to = "level", values_to = "Probability")
+    
+  dat %>%
+    arrange(x) %>%
+    ggplot(aes(x = x, y = Probability)) +
+    geom_line(lwd = 1.2) +
+    theme_bw() +
+    labs(x = xvar) +
+    facet_grid(level ~ .)
+}
+```
+
+This function has 3 arguments:
+
+* `model`: the multinomial regression model to plot
+* `data`: the original data we used to fit the model (eg., `earthquake`)
+* `xvar`: the name of the explanatory variable to plot against, in quotes (e.g., `"age"`)
+
+
+:::{.question}
+#### Question 8
+
+Create a plot using `plot_probsMultinom`. Based on the plot, describe how the probabilities of each damage category change with age (roughly one sentence per category). This does not need to be formal response; pretend you are explaining to someone for a news article.
+:::
+
+:::{.question}
+#### Question 9
+
+Create a confusion matrix for your predictions, with code like
+
+```r
+table("Prediction" = predict(m1), "Actual" = earthquake$Damage)
+```
+
+Calculate the accuracy of your predictions, and assess performance within each level (moderate, none, severe) as well. Are we doing a good job at predicting damage?
+:::
+
+### Adding another variable
+
+Now we're interested in expanding our model to add another explanatory variable. We will look at the `land_surface_condition` variable, which is a categorical variable which represents the condition of the land around the building. This variable takes values `n`, `o`, and `t` in the data (to protect building inhabitants' privacy, the names of the actual levels have been anonymized in the data).
+
+:::{.question}
+#### Question 10
+
+Create log relative risk plots with `x = "age"` and with `grouping = "land_surface_condition"` to assess whether there needs to be an interaction term between age and surface condition. Are the plots helpful here?
+
+:::
+
+When transformations are needed (particularly polynomial transformations), it can be hard to assess interactions from diagnostic plots. An alternative is to perform a hypothesis test, comparing the models with and without interaction terms.
+
+:::{.question}
+#### Question 11
+
+Use a hypothesis test to compare two multinomial regression models: one containing age and surface condition without an interaction, and one containing age, surface condition, and their interaction. Do we have strong evidence that an interaction term is needed? Make sure to state the hypotheses in terms of one or more model parameters, calculate a test statistic and p-value, and explain your conclusion.
+
+:::
+
+:::{.question}
+#### Question 12
+
+Using your final model from Question 11 (age and surface condition, with or without the interaction term depending on the test), create a confusion matrix for your predictions. Do we do a better job at predicting damage with surface condition in the model?
+:::
+
+To assess performance, it can also help to compare against random guessing. In class, we discussed two types of random guessing: 
+
+* assign every building randomly to one of the three categories, with a 1/3 chance for each category
+* predict the most common category for each building. For this data, that would mean predicting that every building suffered moderate damage
+
+:::{.question}
+#### Question 13
+
+Calculate the overall accuracy for each random guessing scheme. How does our model, from Question 11, compare to random guessing?
+
+:::
