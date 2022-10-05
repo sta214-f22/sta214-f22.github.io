@@ -1,0 +1,41 @@
+---
+title: "Class Activity, October 5"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+## Practice with Poisson regression
+
+In this class activity, we will work with data on crimes at 81 US colleges and universities. Our data includes the following variables:
+
+* `type`: college (C) or university (U)
+* `nv`: the number of violent crimes for that institution in the given year
+* `enroll1000`: the number of enrolled students, in thousands
+* `region`: region of the US C = Central, MW = Midwest, NE = Northeast, SE = Southeast, SW = Southwest, and W = West)
+
+To load the data into R, run the following:
+
+```{r eval=F}
+library(tidyverse)
+crimes <- read_csv("https://sta214-f22.github.io/slides/c_data.csv")
+```
+
+### Questions
+
+We are interested in comparing the number of crimes in different US regions. Our model is
+
+$$Crimes_i \sim Poisson(\lambda_i)$$
+
+$$\log(\lambda_i) = \beta_0 + \beta_1 MW_i + \beta_2 NE_i + \beta_3 SE_i + \beta_4 SW_i + \beta_5 W_i$$
+
+1. Fit the Poisson regression model in R, and interpret the estimated coefficients 1.34 and 0.48.
+
+Our Poisson regression model assumes that the number of crimes follows a Poisson distribution. To assess whether this is reasonable, we can look at the distribution of the number of crimes, and compare the mean and variance.
+
+2. Make a histogram showing the distribution of the number of crimes. Does it look reasonable to assume a Poisson distribution for the response?
+
+3. Calculate the mean and variance of the response. Does the Poisson distribution still seem reasonable?
