@@ -12,5 +12,6 @@ October 5
 
 October 7
 : **Lab**{: .label .label-purple } Lab 5
+  : [Lab 4](https://sta214-f22.github.io/labs/lab_5.html)
 
 : **Lab 4 Due**{: .label .label-red }
