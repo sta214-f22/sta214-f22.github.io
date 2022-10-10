@@ -1,9 +1,9 @@
 ---
-title: Poisson regression
+title: Overdispersion
 ---
 
 October 10
-: Poisson regression
+: Project work day
 
 October 12
 : Inference and overdispersion
