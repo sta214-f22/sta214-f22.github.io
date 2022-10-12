@@ -1,0 +1,452 @@
+---
+title: Inference and overdispersion 
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+### Data
+
+```{r include=F}
+library(knitr)
+library(tidyverse)
+
+crimes <- read_csv("~/Documents/Teaching/sta214-f22.github.io/slides/c_data.csv")
+
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+   lines <- options$output.lines
+   if (is.null(lines)) {
+     return(hook_output(x, options))  # pass to default hook
+   }
+   x <- unlist(strsplit(x, "\n"))
+   more <- "..."
+   if (length(lines)==1) {        # first n lines
+     if (length(x) > lines) {
+       # truncate the output, but add ....
+       x <- c(head(x, lines), more)
+     }
+   } else {
+     x <- c(more, x[lines], more)
+   }
+   # paste these lines together
+   x <- paste(c(x, ""), collapse = "\n")
+   hook_output(x, options)
+ })
+
+m1 <- glm(nv ~ region, offset = log(enroll1000),
+          data = crimes, family = poisson)
+```
+
+.large[
+A concerned parent asks us to investigate crime rates on college campuses. We have access to data on 81 different colleges and universities in the US, including the following variables:
+
+* `type`: college (C) or university (U)
+* `nv`: the number of violent crimes for that institution in the given year
+* `enroll1000`: the number of enrolled students, in thousands
+* `region`: region of the US C = Central, MW = Midwest, NE = Northeast, SE = Southeast, SW = Southwest, and W = West)
+]
+
+---
+
+### Model
+
+.large[
+$$Crimes_i \sim Poisson(\lambda_i)$$
+
+$$\log(\lambda_i) = \beta_0 + \beta_1 MW_i + \beta_2 NE_i + \beta_3 SE_i + \beta_4 SW_i + \beta_5 W_i \\ + \log(Enrollment_i)$$
+]
+
+---
+
+### Inference
+
+.large[
+$$\log(\lambda_i) = \beta_0 + \beta_1 MW_i + \beta_2 NE_i + \beta_3 SE_i + \beta_4 SW_i + \beta_5 W_i \\ + \log(Enrollment_i)$$
+
+Our concerned parent wants to know whether the crime rate on campuses is different in different regions. 
+
+.question[
+What hypotheses would we test to answer this question?
+]
+]
+
+---
+
+### Likelihood ratio test
+
+.large[
+Full model:
+
+$$\log(\lambda_i) = \beta_0 + \beta_1 MW_i + \beta_2 NE_i + \beta_3 SE_i + \beta_4 SW_i + \beta_5 W_i \\ + \log(Enrollment_i)$$
+
+Reduced model:
+
+$$\log(\lambda_i) = \beta_0 + \log(Enrollment_i)$$
+]
+
+---
+
+### Likelihood ratio test
+
+.large[
+```{r, output.lines = 22:23}
+m2 <- glm(nv ~ region, offset = log(enroll1000),
+          data = crimes, family = poisson)
+summary(m2)
+```
+
+.question[
+What is my test statistic?
+]
+]
+
+---
+
+### Likelihood ratio test
+
+.large[
+```{r, output.lines = 22:23}
+m2 <- glm(nv ~ region, offset = log(enroll1000),
+          data = crimes, family = poisson)
+summary(m2)
+```
+
+$G = 491 - 433.14 = 57.86$
+
+```{r}
+pchisq(57.86, df=5, lower.tail=F)
+```
+]
+
+---
+
+### Inference
+
+.large[
+$$\log(\lambda_i) = \beta_0 + \beta_1 MW_i + \beta_2 NE_i + \beta_3 SE_i + \beta_4 SW_i + \beta_5 W_i \\ + \log(Enrollment_i)$$
+
+Now our concerned parent wants to know about the difference between Western and Central schools. They would like a "reasonable range" of values for the difference between the regions.
+
+.question[
+How would we construct a "reasonable range" of values for this difference?
+]
+]
+
+---
+
+### Confidence intervals
+
+.large[
+$$\log(\lambda_i) = \beta_0 + \beta_1 MW_i + \beta_2 NE_i + \beta_3 SE_i + \beta_4 SW_i + \beta_5 W_i \\ + \log(Enrollment_i)$$
+
+Confidence interval for $\beta_5$:
+]
+
+---
+
+### Computing $z^*$
+
+.large[
+Example: for a 95% confidence interval, $z^* = 1.96$
+
+```{r}
+qnorm(0.025, lower.tail=F)
+```
+
+Example: for a 99% confidence interval, $z^* = 2.58$:
+
+```{r}
+qnorm(0.005, lower.tail=F)
+```
+]
+
+---
+
+### Confidence intervals
+
+.large[
+```{r, echo=F, output.lines = 10:16}
+summary(m2)
+```
+
+95% confidence interval for $\beta_5$:
+]
+
+---
+
+### Class activity
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_19.html](https://sta214-f22.github.io/class_activities/ca_lecture_19.html)
+]
+
+---
+
+### Class activity
+
+.large[
+
+$$Articles_i \sim Poisson(\lambda_i)$$
+$$\log(\lambda_i) = \beta_0 + \beta_1 Female_i + \beta_2 Married_i + \beta_3 Kids_i + \\  \beta_4 Prestige_i + \beta_5 Mentor_i$$
+
+.question[
+Do I need an offset for this model?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$Articles_i \sim Poisson(\lambda_i)$$
+$$\log(\lambda_i) = \beta_0 + \beta_1 Female_i + \beta_2 Married_i + \beta_3 Kids_i + \\  \beta_4 Prestige_i + \beta_5 Mentor_i$$
+
+.question[
+We are interested in the relationship between prestige and the number of articles published, after accounting for other factors. What confidence interval should we make?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+```{r, echo=F, message=F, warning=F, output.lines = 10:16}
+library(foreign)
+
+articles <- read.dta("http://www.stata-press.com/data/lf2/couart2.dta")
+
+m1 <- glm(art ~ ., data = articles, family = poisson)
+summary(m1)
+```
+
+.question[
+How do I construct a confidence interval for $\exp\{\beta_4\}$?
+]
+]
+
+---
+
+### Checking assumptions
+
+.large[
+* But, we haven't checked assumptions yet!
+* Let's check the Poisson assumption
+]
+
+---
+
+### Checking assumptions
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=7, fig.height=5}
+articles %>%
+  ggplot(aes(x = art)) +
+  geom_bar() +
+  theme_bw() +
+  theme(text = element_text(size = 25)) +
+  labs(x = "Number of articles published")
+```
+
+.large[
+.question[
+Does a Poisson distribution seem reasonable, given this plot?
+]
+]
+
+---
+
+### Checking assumptions
+
+.large[
+Checking the mean/variance condition:
+
+```{r}
+mean(articles$art)
+var(articles$art)
+```
+
+.question[
+Does it look like the mean and variance could be the same?
+]
+]
+
+---
+
+### Overdispersion
+
+.large[
+**Overdispersion** occurs when the response $Y$ has higher variance than we would expect if $Y$ followed a Poisson distribution.
+
+.question[
+What problems do you think it causes to assume the mean and variance are the same, when they are not?
+]
+]
+
+---
+
+### Formal checks for overdispersion
+
+.large[
+First, we need a formal measure of dispersion (relation between mean and variance):
+
+$$\phi = \dfrac{\text{Variance}}{\text{Mean}}$$
+
+.question[
+What should $\phi$ be if there is no overdispersion?
+]
+]
+
+---
+
+### Hypothesis test for overdispersion
+
+.large[
+$$\phi = \dfrac{\text{Variance}}{\text{Mean}}$$
+
+$H_0: \phi = 1$ (no overdispersion)
+
+$H_A: \phi > 1$ (overdispersion)
+
+Now we need to estimate $\phi$...
+]
+
+---
+
+### Pearson residuals and estimated dispersion
+
+.large[
+The *Pearson residual* for observation $i$ is defined as
+
+$$e_{(P)i} = \dfrac{Y_i - \widehat{\lambda}_i}{\sqrt{\widehat{\lambda}_i}}$$
+]
+
+</br>
+
+.large[
+$$\widehat{\phi} = \dfrac{\sum \limits_{i=1}^n e_{(P)i}^2}{n - p}$$
+
+* $p =$ number of parameters in model
+]
+
+---
+
+### Example: estimating dispersion parameter in R
+
+.large[
+```{r}
+# fit the model
+m1 <- glm(art ~ ., data = articles, 
+          family = poisson)
+
+# get Pearson residuals
+pearson_resids <- resid(m1, "pearson")
+
+# estimate dispersion parameter
+phihat <- sum(pearson_resids^2)/(915 - 6)
+phihat
+```
+]
+
+---
+
+### Back to the hypothesis test
+
+.large[
+$$\phi = \dfrac{\text{Variance}}{\text{Mean}}$$
+
+$H_0: \phi = 1$ (no overdispersion)
+
+$H_A: \phi > 1$ (overdispersion)
+
+$\widehat{\phi} = 1.829$
+
+.question[
+Now what?
+]
+]
+
+---
+
+### Calculating a p-value
+
+.large[
+
+```{r, message=F, warning=F}
+library(AER)
+dispersiontest(m1)
+```
+
+So there is strong evidence for overdispersion in the data.
+]
+
+---
+
+### Handling overdispersion
+
+.large[
+Overdispersion is a problem because our standard errors (for confidence intervals and hypothesis tests) are too low.
+
+.question[
+If we think there is overdispersion, what should we do?
+]
+]
+
+---
+
+### Adjusting the standard error
+
+.large[
+* In our data, $\widehat{\phi} = 1.829$
+* This means our variance is 1.829 times bigger than it should be
+* So our standard error is $\sqrt{1.829} = 1.352$ times bigger than it should be
+
+New confidence interval for $\beta_4$:
+
+$0.0128 \pm 1.96 \cdot \sqrt{1.829} \cdot 0.0264 = (-0.0572, \ 0.0828)$
+]
+
+---
+
+### Adjusting the standard error in R
+
+.large[
+```{r, message=F, warning=F}
+m2 <- glm(art ~ ., data = articles, 
+          family = quasipoisson)
+```
+]
+
+```{r echo=F, output.lines = 10:20}
+summary(m2)
+```
+
+.large[
+* Allowing $\phi$ to be different from 1 means we are using a *quasi-likelihood* (in this case, a *quasi-Poisson*)
+]
+
+---
+
+### Adjusting the standard error in R
+
+.large[
+**Poisson:**
+
+```{r echo=F, output.lines = 10:14}
+summary(m1)
+```
+
+**Quasi-Poisson:**
+
+```{r echo=F, output.lines = 10:14}
+summary(m2)
+```
+]
