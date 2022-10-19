@@ -1,0 +1,119 @@
+---
+title: "Lab 6"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday, October 28, 12:00pm (noon) on Canvas
+
+A template R Markdown file is provided: [lab_06_template.Rmd](https://sta214-f22.github.io/labs/lab_06_template.Rmd)
+
+When you are done with the lab, submit your knitted HTML file to Canvas.
+
+# Chicago air quality
+
+In this lab, you will continue to look at the relationship between temperature, air pollution, and deaths in Chicago, between January 1, 1987 and December 31, 2000. There are 5114 rows in the data, with each row representing one day in that time period. Variables include:
+
+* `death`: totals deaths on that day
+* `pm10median`: the median density over the city of large pollutant particles
+* `pm25median`: the median density of smaller pollutant particles
+* `o3median`: median concentration of ozone
+* `so2median`: median concentration of sulphur dioxide
+* `time`: time in days (since the beginning of the study)
+* `tmpd`: average temperature that day (Fahrenheit)
+
+
+### Downloading the data
+
+First, install the `gamair` package in R. Then run the following, which will load the `chicago` dataset.
+
+```r
+library(gamair)
+data("chicago")
+```
+
+## Introduction
+
+In Lab 5, you fit the model
+
+$$Deaths_i \sim Poisson(\lambda_i)$$
+
+$$\log(\lambda_i) = \beta_0 + \beta_1 Temperature_i$$
+There are several reasons why our model might not be a good fit, including overdispersion and the need to add additional covariates. We will consider each of these in this lab.
+
+## Overdispersion test
+
+The Poisson distribution assumes that the mean and variance of the response are the same, but this isn't always the case. We can compare the mean and variance with the *dispersion parameter* $\phi = \dfrac{\text{Variance}}{\text{Mean}}$. If $\phi > 1$, our data is *overdispersed* (i.e., the variance is higher than it should be).
+
+One way to check for overdispersion is to test the hypotheses
+
+$H_0: \phi = 1 \hspace{1cm} H_A: \phi > 1$
+
+While we haven't talked about the specifics of how this test works, we can perform the test using the `dispersiontest` function in the `AER` package (you may need to install the `AER` package).
+
+:::{.question}
+#### Question 1
+
+Use the `dispersiontest` function to test for overdispersion. Report the estimated dispersion parameter $\widehat{\phi}$ and the p-value of the test. Does it seem like there is overdispersion in our data?
+:::
+
+## Handling overdispersion
+
+We have discussed two ways of handling overdispersion in our data: fitting a quasi-Poisson model that estimates $\phi$ and adjusts the standard errors accordingly, and using a Negative Binomial distribution instead of a Poisson distribution. **(Note: the goodness-of-fit test we used for Poisson regression is not suitable for either the quasi-Poisson or the negative binomial models)**
+
+### Quasi-Poisson model
+
+:::{.question}
+#### Question 2
+
+Fit a quasi-Poisson model (`family = quasipoisson`), and report the estimated dispersion parameter $\widehat{\phi}$. What is the relationship between the standard errors for the quasi-Poisson fit and the standard errors for the Poisson fit in Lab 5?
+:::
+
+:::{.question}
+#### Question 3
+
+Are you estimated coefficients $\widehat{\beta}$ different for the quasi-Poisson fit vs. the Poisson fit?
+:::
+
+### Negative Binomial
+
+:::{.question}
+#### Question 4
+
+Fill in the following code to fit a negative binomial regression model (note that because we use the `glm.nb` function, we don't need to specify a `family` in the function call):
+
+```r
+library(MASS)
+m_nb <- glm.nb(... ~ ..., data = chicago)
+summary(m_nb)
+```
+
+What is the estimated value of $\theta$ (the parameter controlling dispersion in the negative binomial model)?
+:::
+
+## Inference
+
+Details on choosing a quasi-Poisson vs. a negative binomial regression model are beyond the scope of this course (I just want you to be familiar with both possible choices). If you want to learn more, [here](https://digitalcommons.unl.edu/cgi/viewcontent.cgi?article=1141&context=usdeptcommercepub) is a link to an interesting paper comparing the two options.
+
+For this lab, you may pick either the quasi-Poisson or the negative binomial regression model. Our final step is to add pollution to our model.
+
+:::{.question}
+#### Question 5
+
+Add pollution to your model from either question 2 or question 4, and report the equation of your fitted model. Make sure to check whether you need any transformations on pollution.
+:::
+
+:::{.question}
+#### Question 6
+
+Interpret the coefficient on temperature in terms of the average number of deaths.
+:::
+
+:::{.question}
+#### Question 7
+
+Calculate a confidence interval for the change in the average number of deaths associated with a one degree increase in temperature, holding pollution constant.
+:::

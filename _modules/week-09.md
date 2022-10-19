@@ -8,11 +8,13 @@ October 17
 
 October 19
 : Overdispersion with negative binomial regression
+  : [Slides](https://sta214-f22.github.io/slides/lecture_21.pdf)
 
   
 October 21
 : **No class**{: .label .label-blue }
 
 : **Lab**{: .label .label-purple } Lab 6
+  : [Lab 6](https://sta214-f22.github.io/labs/lab_6.html)
 
 : **Lab 5 Due**{: .label .label-red }

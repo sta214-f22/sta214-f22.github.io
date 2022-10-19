@@ -1,0 +1,192 @@
+---
+title: Negative binomial regression 
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r include=F}
+library(knitr)
+library(tidyverse)
+library(MASS)
+
+crimes <- read_csv("~/Documents/Teaching/sta214-f22.github.io/slides/c_data.csv")
+
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+   lines <- options$output.lines
+   if (is.null(lines)) {
+     return(hook_output(x, options))  # pass to default hook
+   }
+   x <- unlist(strsplit(x, "\n"))
+   more <- "..."
+   if (length(lines)==1) {        # first n lines
+     if (length(x) > lines) {
+       # truncate the output, but add ....
+       x <- c(head(x, lines), more)
+     }
+   } else {
+     x <- c(more, x[lines], more)
+   }
+   # paste these lines together
+   x <- paste(c(x, ""), collapse = "\n")
+   hook_output(x, options)
+ })
+
+library(foreign)
+
+articles <- read.dta("http://www.stata-press.com/data/lf2/couart2.dta")
+
+```
+
+### Last time: handling overdispersion
+
+.large[
+**Poisson:**
+
+* Mean = $\lambda_i$
+* Variance = $\lambda_i$
+
+**quasi-Poisson:**
+
+* Mean = $\lambda_i$
+* Variance = $\phi \lambda_i$
+* Variance is a linear function of the mean
+
+.question[
+What if we want variance to depend on the mean in a different way?
+]
+]
+
+---
+
+### Introducing the negative binomial
+
+.large[
+If $Y_i \sim NB(\theta, p)$, then $Y_i$ takes values $y = 0, 1, 2, 3, ...$ with probabilities
+
+$$P(Y_i = y) = \dfrac{(y + \theta - 1)!}{y!(\theta - 1)!} (1 - p)^\theta p^y$$
+
+* $\theta > 0$, $\ \ \ p \in [0, 1]$
+* Mean = $\dfrac{p \theta}{1 - p} = \mu$
+* Variance = $\dfrac{p \theta}{(1 - p)^2} = \mu + \dfrac{\mu^2}{\theta}$
+* Variance is a *quadratic* function of the mean
+]
+
+---
+
+### Mean and variance for a negative binomial variable
+
+.large[
+If $Y_i \sim NB(\theta, p)$, then
+
+* Mean = $\dfrac{p \theta}{1 - p} = \mu$
+* Variance = $\dfrac{p \theta}{(1 - p)^2} = \mu + \dfrac{\mu^2}{\theta}$
+
+.question[
+How is $\theta$ related to overdispersion?
+]
+]
+
+---
+
+### Negative binomial regression
+
+.large[
+$$Y_i \sim NB(\theta, \ p_i)$$
+
+$$\log(\mu_i) = \beta_0 + \beta_1 X_i$$
+
+* $\mu_i = \dfrac{p_i \theta}{1 - p_i}$
+* Note that $\theta$ is the same for all $i$
+* Note that just like in Poisson regression, we model the average count
+  * Interpretation of $\beta$s is the same as in Poisson regression
+]
+
+---
+
+### Comparing Poisson, quasi-Poisson, negative binomial
+
+.large[
+**Poisson:**
+
+* Mean = $\lambda_i$
+* Variance = $\lambda_i$
+
+**quasi-Poisson:**
+
+* Mean = $\lambda_i$
+* Variance = $\phi \lambda_i$
+
+**negative binomial:**
+
+* Mean = $\mu_i$
+* Variance = $\mu_i + \dfrac{\mu_i^2}{\theta}$
+]
+
+---
+
+### In R
+
+.large[
+```{r message=F}
+m3 <- glm.nb(art ~ ., data = articles)
+```
+
+```{r echo=F, output.lines = 11:21}
+summary(m3)
+```
+
+$\widehat{\theta} = 2.264$
+]
+
+---
+
+### In R
+
+.large[
+```{r echo=F, output.lines = 11:17}
+summary(m3)
+```
+
+.question[
+How do I interpret the estimated coefficient -0.176?
+]
+]
+
+
+---
+
+### quasi-Poisson vs. negative binomial
+
+.large[
+
+.pull-left[
+**quasi-Poisson:**
+
+* linear relationship between mean and variance
+* easy to interpret $\widehat{\phi}$
+* same as Poisson regression when $\phi = 1$
+* simple adjustment to estimated standard errors
+* estimated coefficients same as in Poisson regression
+]
+
+.pull-right[
+**negative binomial:**
+
+* quadratic relationship between mean and variance
+* we get to use a likelihood, rather than a quasi-likelihood
+* Same as Poisson regression when $\theta$ is very large and $p$ is very small
+]
+
+.question[
+For this class, either is appropriate to handle overdispersion.
+]
+]
