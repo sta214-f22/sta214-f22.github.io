@@ -1,0 +1,365 @@
+---
+title: Zero inflated models
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+### Recap: College drinking
+
+.large[
+Survey data from 77 college students on a dry campus (i.e., alcohol is prohibited) in the US. Survey asks students "How many alcoholic drinks did you consume last weekend?"
+
+* `drinks`: the number of drinks the student reports consuming
+* `sex`: an indicator for whether the student identifies as male
+* `OffCampus`: an indicator for whether the student lives off campus
+* `FirstYear`: an indicator for whether the student is a first-year student
+
+.question[
+Our goal: model the number of drinks students report consuming.
+]
+]
+
+---
+
+### Recap: EDA
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=7, fig.height=5}
+library(tidyverse)
+library(knitr)
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+   lines <- options$output.lines
+   if (is.null(lines)) {
+     return(hook_output(x, options))  # pass to default hook
+   }
+   x <- unlist(strsplit(x, "\n"))
+   more <- "..."
+   if (length(lines)==1) {        # first n lines
+     if (length(x) > lines) {
+       # truncate the output, but add ....
+       x <- c(head(x, lines), more)
+     }
+   } else {
+     x <- c(more, x[lines], more)
+   }
+   # paste these lines together
+   x <- paste(c(x, ""), collapse = "\n")
+   hook_output(x, options)
+ })
+
+wdrinks <- read.csv("~/Documents/Teaching/sta279-s22.github.io/slides/weekendDrinks.csv")
+
+FirstYear <- ifelse( wdrinks$dorm %in% c("mohn","kittlesby", "kildahl"), "TRUE", "FALSE")
+OffCampus <- ifelse( wdrinks$dorm == "off campus", "TRUE", "FALSE")
+
+wdrinks <- cbind(wdrinks, FirstYear, OffCampus)
+
+wdrinks %>%
+  ggplot(aes(x = drinks)) +
+  geom_bar() +
+  theme_bw() +
+  theme(text = element_text(size = 25))
+```
+
+.large[
+.question[
+What do you notice about this distribution?
+]
+]
+
+---
+
+### Excess zeros
+
+.large[
+.question[
+Why might a student report consuming 0 drinks?
+]
+]
+
+---
+
+### Zero-inflated Poisson (ZIP) model
+
+.large[
+$$P(Y_i = y) = \begin{cases} e^{-\lambda_i}(1 - \alpha_i) + \alpha_i & y = 0 \\ \dfrac{e^{-\lambda_i} \lambda_i^y}{y!}(1 - \alpha_i) & y > 0 \end{cases}$$
+
+where
+
+$\log \left( \dfrac{\alpha_i}{1 - \alpha_i} \right) = \gamma_0 + \gamma_1 FirstYear_i$
+
+$\log(\lambda_i) = \beta_0 + \beta_1 OffCampus_i + \beta_2 Male_i$
+
+.question[
+What do $\alpha_i$ and $\lambda_i$ represent in this model?
+]
+]
+
+---
+
+### Fitting the model in R
+
+.large[
+```{r, output.lines = 10:20, message=F, warning=F}
+library(pscl)
+m1 <- zeroinfl(drinks ~ OffCampus + sex | FirstYear, 
+               data = wdrinks)
+summary(m1)
+```
+]
+
+---
+
+### Fitted ZIP model
+
+.large[
+$$P(Y_i = y) = \begin{cases} e^{-\lambda_i}(1 - \alpha_i) + \alpha_i & y = 0 \\ \dfrac{e^{-\lambda_i} \lambda_i^y}{y!}(1 - \alpha_i) & y > 0 \end{cases}$$
+
+$\log \left( \dfrac{\widehat{\alpha}_i}{1 - \widehat{\alpha}_i} \right) = -0.60 + 1.14 FirstYear_i$
+
+$\log(\widehat{\lambda}_i) = 0.75 + 0.42 \ OffCampus_i + 1.02 \ Male_i$
+
+.question[
+How would I interpret the coefficient 1.14 in the fitted model?
+]
+]
+
+---
+
+### Fitted ZIP model
+
+.large[
+$$P(Y_i = y) = \begin{cases} e^{-\lambda_i}(1 - \alpha_i) + \alpha_i & y = 0 \\ \dfrac{e^{-\lambda_i} \lambda_i^y}{y!}(1 - \alpha_i) & y > 0 \end{cases}$$
+
+$\log \left( \dfrac{\widehat{\alpha}_i}{1 - \widehat{\alpha}_i} \right) = -0.60 + 1.14 FirstYear_i$
+
+$\log(\widehat{\lambda}_i) = 0.75 + 0.42 \ OffCampus_i + 1.02 \ Male_i$
+
+.question[
+How would I interpret the coefficient 0.42 in the fitted model?
+]
+]
+
+---
+
+### Data: Framingham heart study
+
+.large[
+Data collected on residents of Framingham, MA over a long period of time, to study variables related to heart health. We will work with a subset of the data, containing
+
+* `cigsPerDay`: The number of cigarettes smoked per day during the study period.
+* `education`: 1 = High School, 2 = Some College, 3 = College Degree, 4 = Advanced Degree.
+* `male`: 1 = Male, 0 = Female.
+* `age`: The age of the individual in years.
+* `diabetes`: 1 if the individual has diabetes, 0 otherwise.
+
+]
+
+---
+
+### EDA: number of cigarettes smoked
+
+```{r, echo=F, warning=F, message=F, fig.align='center', fig.height=5, fig.width=7}
+heart_data <- read.csv("~/Documents/Teaching/sta214-f22.github.io/class_activities/framingham.csv")
+
+heart_data <- heart_data %>%
+  drop_na(male, age, education, diabetes, cigsPerDay) %>%
+  mutate(education = as.factor(education))
+
+heart_data %>%
+  ggplot(aes(x = cigsPerDay)) +
+  geom_histogram(bins = 20) +
+  theme_bw() +
+  labs(x = "Number of cigarettes smoked per day") +
+  theme(text = element_text(size = 20))
+```
+
+.large[
+.question[
+What do you notice about this distribution?
+]
+]
+
+---
+
+### EDA: number of cigarettes smoked
+
+```{r, echo=F, warning=F, message=F, fig.align='center', fig.height=5, fig.width=7}
+
+heart_data %>%
+  ggplot(aes(x = cigsPerDay)) +
+  geom_histogram(bins = 20) +
+  theme_bw() +
+  labs(x = "Number of cigarettes smoked per day") +
+  theme(text = element_text(size = 20))
+```
+
+.large[
+.question[
+What latent (unobserved) binary variable would impact the number of cigarettes smoked?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_23.html](https://sta214-f22.github.io/class_activities/ca_lecture_23.html)
+]
+
+---
+
+### Class activity
+
+.large[
+$$P(Y_i = y) = \begin{cases} e^{-\lambda_i}(1 - \alpha_i) + \alpha_i & y = 0 \\ \dfrac{e^{-\lambda_i} \lambda_i^y}{y!}(1 - \alpha_i) & y > 0 \end{cases}$$
+
+$$\log \left( \dfrac{\widehat{\alpha}_i}{1 - \widehat{\alpha}_i} \right) = -2.51 + 0.051 Age_i$$
+
+$$\log(\widehat{\lambda}_i) = 2.93 -0.022 EducationSome_i -0.067 EducationCollege_i + \\ 0.009 EducationAdv_i - 0.046 Diabetes_i$$
+
+.question[
+How do we interpret the coefficient -0.046 in the fitted model?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$P(Y_i = y) = \begin{cases} e^{-\lambda_i}(1 - \alpha_i) + \alpha_i & y = 0 \\ \dfrac{e^{-\lambda_i} \lambda_i^y}{y!}(1 - \alpha_i) & y > 0 \end{cases}$$
+
+$$\log \left( \dfrac{\widehat{\alpha}_i}{1 - \widehat{\alpha}_i} \right) = -2.51 + 0.051 Age_i$$
+
+$$\log(\widehat{\lambda}_i) = 2.93 -0.022 EducationSome_i -0.067 EducationCollege_i + \\ 0.009 EducationAdv_i - 0.046 Diabetes_i$$
+
+.question[
+What is the estimated probability that a 50 year old does not smoke?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$P(Y_i = y) = \begin{cases} e^{-\lambda_i}(1 - \alpha_i) + \alpha_i & y = 0 \\ \dfrac{e^{-\lambda_i} \lambda_i^y}{y!}(1 - \alpha_i) & y > 0 \end{cases}$$
+
+$$\log \left( \dfrac{\widehat{\alpha}_i}{1 - \widehat{\alpha}_i} \right) = -2.51 + 0.051 Age_i$$
+
+$$\log(\widehat{\lambda}_i) = 2.93 -0.022 EducationSome_i -0.067 EducationCollege_i + \\ 0.009 EducationAdv_i - 0.046 Diabetes_i$$
+
+.question[
+What is the expected number of cigarettes smoked per day, for a smoker with diabetes and some college education?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$P(Y_i = y) = \begin{cases} e^{-\lambda_i}(1 - \alpha_i) + \alpha_i & y = 0 \\ \dfrac{e^{-\lambda_i} \lambda_i^y}{y!}(1 - \alpha_i) & y > 0 \end{cases}$$
+
+$$\log \left( \dfrac{\widehat{\alpha}_i}{1 - \widehat{\alpha}_i} \right) = -2.51 + 0.051 Age_i$$
+
+$$\log(\widehat{\lambda}_i) = 2.93 -0.022 EducationSome_i -0.067 EducationCollege_i + \\ 0.009 EducationAdv_i - 0.046 Diabetes_i$$
+
+.question[
+What is the probability that a 45 year old college graduate without diabetes smokes one cigarette per day?
+]
+]
+
+---
+
+### Making predictions
+
+.large[
+$$P(Y_i = y) = \begin{cases} e^{-\lambda_i}(1 - \alpha_i) + \alpha_i & y = 0 \\ \dfrac{e^{-\lambda_i} \lambda_i^y}{y!}(1 - \alpha_i) & y > 0 \end{cases}$$
+
+$$\log \left( \dfrac{\widehat{\alpha}_i}{1 - \widehat{\alpha}_i} \right) = -2.51 + 0.051 Age_i$$
+
+$$\log(\widehat{\lambda}_i) = 2.93 -0.022 EducationSome_i -0.067 EducationCollege_i + \\ 0.009 EducationAdv_i - 0.046 Diabetes_i$$
+
+.question[
+How would I estimate the expected number of cigarettes smoked per day, by a college graduate without diabetes?
+]
+]
+
+---
+
+### A new question
+
+.large[
+$$P(Y_i = y) = \begin{cases} e^{-\lambda_i}(1 - \alpha_i) + \alpha_i & y = 0 \\ \dfrac{e^{-\lambda_i} \lambda_i^y}{y!}(1 - \alpha_i) & y > 0 \end{cases}$$
+
+$$\log \left( \dfrac{\alpha_i}{1 - \alpha_i} \right) = \gamma_0 + \gamma_1 Age_i$$
+
+$$\log(\lambda_i) = \beta_0 + \beta_1 EducationSome_i + \beta_2 EducationCollege_i + \\ \beta_3 EducationAdv_i + \beta_4 Diabetes_i$$
+
+.question[
+New research question: for smokers, does the number of cigarettes smoked per day depend on age?
+
+How would we answer this research question?
+]
+]
+
+---
+
+### Inference
+
+.large[
+$$\log \left( \dfrac{\alpha_i}{1 - \alpha_i} \right) = \gamma_0 + \gamma_1 Age_i$$
+
+$$\log(\lambda_i) = \beta_0 + \beta_1 EducationSome_i + \beta_2 EducationCollege_i + \\ \beta_3 EducationAdv_i + \beta_4 Diabetes_i + \beta_5 Age_i$$
+
+.question[
+Research question: for smokers, does the number of cigarettes smoked per day depend on age?
+
+What are the null and alternative hypotheses?
+]
+]
+
+---
+
+### Wald test
+
+.large[
+```{r, output.lines = 10:16}
+m2 <- zeroinfl(cigsPerDay ~ education + 
+                 diabetes + age | age, 
+               data = heart_data)
+summary(m2)
+```
+]
+
+---
+
+### Likelihood ratio test
+
+.large[
+
+```{r}
+m2 <- zeroinfl(cigsPerDay ~ education + 
+                 diabetes + age | age, 
+               data = heart_data)
+m2$loglik
+```
+
+```{r}
+m1 <- zeroinfl(cigsPerDay ~ education + 
+                 diabetes | age, 
+               data = heart_data)
+m1$loglik
+```
+]
