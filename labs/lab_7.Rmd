@@ -1,0 +1,107 @@
+---
+title: "Lab 7"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday, November 4, 12:00pm (noon) on Canvas
+
+A template R Markdown file is provided: [lab_07_template.Rmd](https://sta214-f22.github.io/labs/lab_07_template.Rmd)
+
+When you are done with the lab, submit your knitted HTML file to Canvas.
+
+# Discussion forums data
+
+In online discussion forums, a wide variety of information is collected about each post. This information can help moderators monitor the site, by helping them predict which posts will receive the most attention, and which may need to be moderated or deleted due to offensive or off-topic comments.
+
+The data here comes from a website called ScienceForums.Net (SFN), which has been open since 2002 and hosts conversations on a range of topics from biological and physical science to religion and philosophy. Each row in the data represents one ‘thread’, which is comprised of a series of posts stemming from an initial post. For each thread, we have some information that SFN collects such as the number of views and the number of authors. The threads present in the data are a random sample of threads from 2002-2014, with the data collected in 2014. SFN moderators are interested in using this data to determine which threads warrant the most attention.
+
+The dataset provided for this lab contains the following columns:
+
+* `Age`: the age of the thread (in days) when the data was collected in 2014, measured from the first post in the thread
+* `State`: sometimes moderators close threads if they are inappropriate. closed indicates the thread has been closed, otherwise State is open
+* `Posts`: the number of posts in the thread
+* `Views`: the total number of views of the thread
+* `Duration`: the number of days between the first and last posts in the thread
+* `Authors`: the number of distinct authors posting in the thread
+* `AuthorExperience`: the number of days the author of the first post in the thread had been registered on SFN when the thread began (0 indicates they registered that day)
+* `DeletedPosts`: the number of posts in the thread that have been deleted by a moderator
+* `Forum`: the forum in which the thread was posted (e.g., Science)
+* `AuthorBanned`: whether the original author of the thread is currently banned from posting on SFN (at the time of data collection, not when the thread was first posted)
+
+### Downloading the data
+
+```r
+sfn <- read.csv("https://sta214-f22.github.io/labs/sfn_new.csv")
+```
+
+## Questions
+
+We will begin by exploring the data, and fitting a Poisson regression model to predict the number of Posts.
+
+:::{.question}
+#### Question 1
+
+Create empirical log means plots to explore the relationships between quantitative explanatory variables and the number of Posts. Do you think any transformations are necessary?
+:::
+
+:::{.question}
+#### Question 2
+
+Do you think we need to include an offset in our model? If so, what would the offset be?
+:::
+
+:::{.question}
+#### Question 3
+
+Using your exploratory data analysis from Questions 1 and 2, fit a Poisson regression model to predict Posts using Views, AuthorExperience, State, and Forum. Include transformations and an offset term if you think they are needed.
+:::
+
+:::{.question}
+#### Question 4
+
+Perform a $\chi^2$ goodness of fit for your Poisson regression model. Do you think the model is a good fit to the data?
+:::
+
+
+### ZIP models
+
+One reason the model may be a poor fit is that there could be excess 0s in our data.
+
+:::{.question}
+#### Question 5
+
+Make a histogram showing the distribution of Posts. Does it looks like we may have excess 0s? (You may need to limit the range of the x-axis in your histogram)
+:::
+
+:::{.question}
+#### Question 6
+
+Based on your earlier exploratory data analysis, fill in the code below to fit a ZIP model for the number of Posts:
+
+```{r eval=F}
+library(pscl)
+zip_m <- zeroinfl(Posts ~ ... | ..., 
+                  offset = ...,
+                  data = sfn)
+```
+
+You may choose which variables to include (based on your EDA), and you may use the same variables for the logistic and Poisson components of the ZIP model.
+:::
+
+:::{.question}
+#### Question 7
+
+Using your ZIP model, what is the predicted probability that an open thread with 300 views, in the Speculation forum, created 10 days ago by a new author, has 0 posts?
+:::
+
+:::{.question}
+#### Question 8
+
+Using your ZIP model, perform a hypothesis test to investigate whether threads in different forums have different numbers of posts, after accounting for the number of views, author experience, and state.
+:::
+
+

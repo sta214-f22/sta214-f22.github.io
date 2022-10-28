@@ -115,6 +115,8 @@ logmean_plot(chicago, 20, "equal_size", x = "tmpd",
 
 There may be a bit of nonlinearity in the relationship between temperature and the log mean number of deaths. I think a linear relationship is probably good enough for now, but we could use a polynomial model instead.
 
+**Grading:** Either a linear relationship or a transformation is fine here, as long as they explain their reasoning.
+
 
 ### Question 4 (2 pts)
 
@@ -129,7 +131,7 @@ $$Deaths_i \sim Poisson(\lambda_i)$$
 
 $$\log(\lambda_i) = \beta_0 + \beta_1 Temperature_i$$
 
-**Grading:** Lose 1 pt for incorrect notation
+**Grading:** Lose 1 pt for incorrect notation. They can use a transformation on Temperature if they selected a transformation in Question 3.
 
 ### Question 6 (3 pts)
 
@@ -142,7 +144,7 @@ $\log(\widehat{\lambda}_i) = 4.873 - 0.0025 \ Temperature_i$
 
 We estimate that an increase of 1 degree in temperature is associated with a decrease in the average number of deaths by a factor of $e^{-0.0025} = 0.9975$.
 
-**Grading:** Lose 1 pt if they interpret on the log scale and don't exponentiate
+**Grading:** Lose 1 pt if they interpret on the log scale and don't exponentiate. Note: if they chose a polynomial transformation, they can't really interpret the slope here. An acceptable answer would be "with a polynomial transformation, we can't interpret the slope." If they use a polynomial transformation and still try to interpret the slope, leave a note that this doesn't make sense.
 
 ### Question 7 (3 pts)
 
@@ -153,6 +155,8 @@ pchisq(8471.8, df=5112, lower.tail=F)
 ```
 
 which is approximately 0, so the model is not a good fit to the data. (This could occur because of overdispersion, or because we need to add more variables to the model)
+
+**Grading:** 1 pt for test statistic (residual deviance), 1 pt for degrees of freedom, 1 pt for p-value. Note that answers may vary if they transformed temperature.
 
 ### Question 8 (5 pts)
 

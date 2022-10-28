@@ -1,0 +1,112 @@
+---
+title: Zero inflated models
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=7, fig.height=5}
+library(tidyverse)
+library(knitr)
+library(pscl)
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+   lines <- options$output.lines
+   if (is.null(lines)) {
+     return(hook_output(x, options))  # pass to default hook
+   }
+   x <- unlist(strsplit(x, "\n"))
+   more <- "..."
+   if (length(lines)==1) {        # first n lines
+     if (length(x) > lines) {
+       # truncate the output, but add ....
+       x <- c(head(x, lines), more)
+     }
+   } else {
+     x <- c(more, x[lines], more)
+   }
+   # paste these lines together
+   x <- paste(c(x, ""), collapse = "\n")
+   hook_output(x, options)
+ })
+
+heart_data <- read.csv("~/Documents/Teaching/sta214-f22.github.io/class_activities/framingham.csv")
+
+heart_data <- heart_data %>%
+  drop_na(male, age, education, diabetes, cigsPerDay) %>%
+  mutate(education = as.factor(education))
+```
+
+
+### A new question
+
+.large[
+$$P(Y_i = y) = \begin{cases} e^{-\lambda_i}(1 - \alpha_i) + \alpha_i & y = 0 \\ \dfrac{e^{-\lambda_i} \lambda_i^y}{y!}(1 - \alpha_i) & y > 0 \end{cases}$$
+
+$$\log \left( \dfrac{\alpha_i}{1 - \alpha_i} \right) = \gamma_0 + \gamma_1 Age_i$$
+
+$$\log(\lambda_i) = \beta_0 + \beta_1 EducationSome_i + \beta_2 EducationCollege_i + \\ \beta_3 EducationAdv_i + \beta_4 Diabetes_i$$
+
+.question[
+New research question: for smokers, does the number of cigarettes smoked per day depend on age?
+
+How would we answer this research question?
+]
+]
+
+---
+
+### Inference
+
+.large[
+$$\log \left( \dfrac{\alpha_i}{1 - \alpha_i} \right) = \gamma_0 + \gamma_1 Age_i$$
+
+$$\log(\lambda_i) = \beta_0 + \beta_1 EducationSome_i + \beta_2 EducationCollege_i + \\ \beta_3 EducationAdv_i + \beta_4 Diabetes_i + \beta_5 Age_i$$
+
+.question[
+Research question: for smokers, does the number of cigarettes smoked per day depend on age?
+
+What are the null and alternative hypotheses?
+]
+]
+
+---
+
+### Wald test
+
+.large[
+```{r, output.lines = 10:16}
+m2 <- zeroinfl(cigsPerDay ~ education + 
+                 diabetes + age | age, 
+               data = heart_data)
+summary(m2)
+```
+]
+
+---
+
+### Likelihood ratio test
+
+.large[
+
+```{r}
+m2 <- zeroinfl(cigsPerDay ~ education + 
+                 diabetes + age | age, 
+               data = heart_data)
+m2$loglik
+```
+
+```{r}
+m1 <- zeroinfl(cigsPerDay ~ education + 
+                 diabetes | age, 
+               data = heart_data)
+m1$loglik
+```
+]
