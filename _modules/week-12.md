@@ -1,12 +1,14 @@
 ---
-title: Mixed effects models
+title: Exam 2
 ---
 
 November 7
-: Introduction to mixed effects models
+: Inference with mixed effects models, Review
 
 November 9
-: **Lab**{: .label .label-purple } Lab 8
+: **Exam 2**{: .label .label-red }
+
+: **Project 2 released**{: .label .label-green }
 
 November 11
 : Inference with mixed effects models

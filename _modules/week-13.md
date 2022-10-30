@@ -9,6 +9,5 @@ November 16
 : Random slopes
 
 November 18
-: **Lab**{: .label .label-purple } Lab 9
+: Random slopes
 
-: **Project 2 due**{: .label .label-red }
