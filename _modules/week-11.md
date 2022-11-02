@@ -8,6 +8,7 @@ October 31
 
 November 2
 : Introduction to mixed effects models
+  : [Slides](https://sta214-f22.github.io/slides/lecture_26.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture_26.html)
 
 November 4
 : Introduction to mixed effects models
