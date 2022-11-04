@@ -1,0 +1,172 @@
+---
+title: "Lab 8"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Monday, November 14, 12:00pm (noon) on Canvas
+
+A template R Markdown file is provided: [lab_08_template.Rmd](https://sta214-f22.github.io/labs/lab_08_template.Rmd)
+
+When you are done with the lab, submit your knitted HTML file to Canvas.
+
+
+# Data
+
+Researchers have observed many species for which larger offspring have a biological fitness advantage over smaller offspring, but there have been competing hypotheses for why this is the case, and there are exceptions. In the paper "Why does offspring size affect performance? Integrating metabolic scaling with life-history theory" (Pettersen et al. 2015, *Proc. R. Soc. B.*), the authors propose that larger offspring are more efficient in energy consumption and thus have greater fitness.
+
+To investigate, the authors collected data on two species of marine bryozoan, *Bugula neritina* and *Watersipora subtorquata*. After initial growth, the developmental process of these two species consists of three phases before they are considered mature - a larval stage (before the individual settles and begins metamorphosis), an early post-settlement stage, and a late post-settlement stage (as the individual nears the end of metamorphosis).
+
+Here we have data from 568 individuals from these two species, measured at the three different developmental stages. For each individual, the researchers recorded the mass (in micrograms) and the rate of oxygen consumption. The rate of oxygen consumption was then converted into the metabolic rate (rate of energy consumption), based on the amount of energy in oxygen.
+
+Note that the same individuals were measured at the early and late stages, so while there are 568 individuals in the data, the dataset has 823 rows.
+
+The different columns are:
+
+* *Species:* 	Species of the organism measured, either bugula (Bugula neritina) or watersipora (Watersipora subtorquata)
+* *Stage:* Developmental stage of the organism (larvae = larval stage, early = early post-settlement stage, late = late post-settlement stage)
+* *Run:* Which run of the study the individual was recorded in. Several runs were done for each species
+* *Mass:* Mass of the individual (in micrograms)
+* *Metabolic:* Recorded metabolic rate (rate of energy consumption) of the individual (in mJ per hour)
+
+### Downloading the data
+
+The data for this assignment comes from the paper by Pettersen *et al.*, and is stored in a CSV file. CSV files can be read into R with the `read_csv` function, which is part of the `readr` package in the tidyverse. The following code imports the data and saves it as a data frame called `bryozoan`:
+
+```r
+bryozoan <- read_csv("https://sta112-s22.github.io/homework/bryozoan_data.csv")
+```
+
+# Mixed effects models
+
+Even when experiments are repeated under the same conditions, there is natural variation between repetitions (in biology, this is often called *technical variation*). Different repetitions are recorded in the `Run` variable in this data, and to handle variation between runs, Pettersen *et al.* used random effects. We will do the same in this lab.
+
+We will begin with some EDA, then fit some mixed effects models to the data. We are interested in the relationship between Mass and Metabolic rate.
+
+*Note: you may have seen this data in 112, where we looked at log mass and log metabolic rate. We will just use Mass and Metabolic rate (no logs) for this lab.*
+
+## EDA
+
+For simplicity, we will focus on just the early-stage *Bugula* for now.
+
+:::{.question}
+#### Question 1
+
+Create a new dataset, called `bugula_early`, which contains only the early-stage *Bugula* from the `bryozoan` data. Use this new dataset for the rest of the lab.
+
+:::
+
+Now let's visualize the distribution of Metabolic rate in different stages and runs.
+
+:::{.question}
+#### Question 2
+
+Create side-by-side boxplots showing the distribution of metabolic rate in each run. Does there seem to be much variation between runs?
+
+:::
+
+
+:::{.question}
+#### Question 3
+
+Explain why random effects are appropriate to model variation between runs.
+
+:::
+
+## A random intercepts model
+
+Motivated by Question 3, we will fit the following model:
+
+$$Metabolic_{ij} = \beta_0 + u_i + \varepsilon_{ij}$$
+
+where $Metabolic_{ij}$ is the metabolic rate for organism $j$ in run $i$, and $u_i \sim N(0, \sigma_u^2)$, $\varepsilon_{ij} \sim N(0, \sigma_\varepsilon^2)$.
+
+This is called a *random intercepts model*, because we don't include any other variables; we just have random variation around the intercept $\beta_0$.
+
+:::{.question}
+#### Question 4
+
+Run the following code to fit the random intercepts model (make sure the `lme4` package is loaded).
+
+```{r eval=F}
+m1 <- lmer(Metabolic ~ (1|Run), data = bugula_early)
+summary(m1)
+```
+
+Report the parameter estimates $\widehat{\beta}_0$, $\widehat{\sigma}_u^2$, and $\widehat{\sigma}_\varepsilon^2$.
+
+:::
+
+:::{.question}
+#### Question 5
+
+Interpret the estimate $\widehat{\beta}_0$.
+
+:::
+
+:::{.question}
+#### Question 6
+
+Using your fitted model from Question 4, calculate the estimated intra-class correlation, and interpret it in context.
+
+Do large or small values of the intra-class correlation suggest a random effect is important?
+
+:::
+
+
+## Adding mass
+
+Now we want to add mass to the model, to explore the relationship between mass and metabolic rate.
+
+:::{.question}
+#### Question 7
+
+Write down the population linear mixed effects model that describes the relationship between mass and metabolic rate, accounting for random variation between Runs.
+
+:::
+
+:::{.question}
+#### Question 8
+
+Fit the model from Question 7, and report the coefficient estimates $\widehat{\beta}_0$, $\widehat{\beta}_1$, $\widehat{\sigma}_u^2$, and $\widehat{\sigma}_\varepsilon^2$.
+
+:::
+
+:::{.question}
+#### Question 9
+
+Interpret the fixed effect estimates $\widehat{\beta}_0$ and $\widehat{\beta}_1$.
+
+:::
+
+## Predictions
+
+Now let's make some predictions from our mixed effects model from Question 8. To get predictions for existing runs, we can use the `coef()` function to get the estimated intercept in each run.
+
+Use the following code to compute an estimated intercept ($\beta_0 + u_i$) for each run (replace `...` with the name of your model from Question 8):
+
+```{r eval=F}
+coef(...)
+```
+
+:::{.question}
+#### Question 10
+
+What is the estimated metabolic rate for an early-stage *Bugula* of mass 15 $\mu$g, in Run 3?
+
+:::
+
+But what happens if we repeat the experiment again? We would get a *new* run, not one of the existing runs. How do we handle that in prediction?
+
+Well, a new run is associated with a new $u_i$. Since $u_i$ is a random variable, we don't know what it will be. But since $u_i \sim N(0, \sigma_u^2)$, our best guess is that $u_i = 0$. So for a new run, our predicted metabolic rate is $\widehat{\beta}_0 + \widehat{\beta}_1 \ Mass_{ij}$.
+
+:::{.question}
+#### Question 11
+
+What is the estimated metabolic rate for an early-stage *Bugula* of mass 15 $\mu$g, in a new run?
+
+:::
+

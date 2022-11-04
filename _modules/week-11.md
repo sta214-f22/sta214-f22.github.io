@@ -11,7 +11,8 @@ November 2
   : [Slides](https://sta214-f22.github.io/slides/lecture_26.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture_26.html)
 
 November 4
-: Introduction to mixed effects models
+: **Lab**{: .label .label-purple } Lab 8
+  : [Slides](https://sta214-f22.github.io/slides/lecture_27.pdf), [Lab 8](https://sta214-f22.github.io/labs/lab_8.html)
 
 : **Lab 7 due**{: .label .label-red }
 

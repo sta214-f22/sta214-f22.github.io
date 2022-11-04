@@ -1,0 +1,106 @@
+---
+title: Lab 8
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+### Agenda
+
+.large[
+* Reminder: Exam 2 in class next Wednesday
+  * Multinomial regression and prediction
+  * Poisson regression
+  * Quasi-Poisson and negative binomial models
+  * A little bit on ZIP models
+* Some time in class on Monday for review. Come with questions!
+]
+
+---
+
+### Class activity from last time
+
+.large[
+$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+
+where $Price_{ij}$ is the price of rental $j$ in neighborhood $i$.
+
+* $\widehat{\beta}_0 = 27.28$
+* $\widehat{\beta}_1 = 14.81$
+
+.question[
+How would I interpret $\widehat{\beta}_0$ and $\widehat{\beta}_1$?
+]
+]
+
+---
+
+### Class activity from last time
+
+.large[
+$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+
+where $Price_{ij}$ is the price of rental $j$ in neighborhood $i$.
+
+* $\widehat{\beta}_0 = 27.28$
+* $\widehat{\beta}_1 = 14.81$
+
+On average (across neighborhoods), we expect that the price of rental with 0 overall satisfaction is $27.28.
+
+For a fixed neighborhood, an increase of 1 point in overall satisfaction is associated with an increase of $14.81 in rental price.
+]
+
+---
+
+### Class activity from last time
+
+.large[
+$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+
+where $Price_{ij}$ is the price of rental $j$ in neighborhood $i$.
+
+$\widehat{\rho}_{group} = \dfrac{\widehat{\sigma}_u^2}{\widehat{\sigma}_u^2 + \widehat{\sigma}_\varepsilon^2} = \dfrac{1048}{1048 + 6762} = 0.134$
+
+.question[
+How do I interpret this estimated intra-class correlation?
+]
+]
+
+---
+
+### Class activity from last time
+
+.large[
+$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+
+where $Price_{ij}$ is the price of rental $j$ in neighborhood $i$.
+
+$\widehat{\rho}_{group} = \dfrac{\widehat{\sigma}_u^2}{\widehat{\sigma}_u^2 + \widehat{\sigma}_\varepsilon^2} = \dfrac{1048}{1048 + 6762} = 0.134$
+
+.question[
+How do I interpret this estimated intra-class correlation?
+]
+]
+
+.large[
+About 13% of the variability in price can be explained by differences in the average price between neighborhoods (after accounting for overall satisfaction).
+]
+
+---
+
+### Lab 8
+
+.large[
+Practice with mixed effects models 
+]
