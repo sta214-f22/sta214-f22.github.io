@@ -4,6 +4,7 @@ title: Exam 2
 
 November 7
 : Review for Exam 2
+  : [Slides](https://sta214-f22.github.io/slides/exam_2_review.pdf)
 
 November 9
 : **Exam 2**{: .label .label-red }
