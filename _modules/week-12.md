@@ -13,4 +13,4 @@ November 9
   : [Project 2](https://sta214-f22.github.io/projects/project_2.html)
 
 November 11
-: Inference with mixed effects models
+: Project work day
