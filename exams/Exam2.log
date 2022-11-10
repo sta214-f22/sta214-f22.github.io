@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021) (preloaded format=pdflatex 2021.8.13)  8 NOV 2022 16:24
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021) (preloaded format=pdflatex 2021.8.13)  8 NOV 2022 19:58
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**Exam1.tex
-(./Exam1.tex
+**Exam2.tex
+(./Exam2.tex
 LaTeX2e <2020-10-01> patch level 4
 L3 programming layer <2021-02-18>
 (/usr/local/texlive/2021/texmf-dist/tex/latex/base/article.cls
@@ -655,8 +655,8 @@ File: l3backend-pdftex.def 2021-03-18 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count421
 \l__pdf_internal_box=\box98
 )
-(./Exam1.aux)
-\openout1 = `Exam1.aux'.
+(./Exam2.aux)
+\openout1 = `Exam2.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 66.
 LaTeX Font Info:    ... okay on input line 66.
@@ -741,9 +741,9 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 66.
 LaTeX Info: Redefining \pageref on input line 66.
 LaTeX Info: Redefining \nameref on input line 66.
- (./Exam1.out) (./Exam1.out)
+ (./Exam2.out) (./Exam2.out)
 \@outlinefile=\write4
-\openout4 = `Exam1.out'.
+\openout4 = `Exam2.out'.
 
 Package biblatex Info: Trying to load language 'english'...
 Package biblatex Info: ... file 'english.lbx' found.
@@ -772,12 +772,12 @@ Package biblatex Info: ... and expl3
 tex)))
 Package: blx-case-expl3 2020/12/31 v3.16 expl3 case changing code for biblatex
 )
-\openout3 = `Exam1.bcf'.
+\openout3 = `Exam2.bcf'.
 
 Package biblatex Info: Trying to load bibliographic data...
-Package biblatex Info: ... file 'Exam1.bbl' not found.
+Package biblatex Info: ... file 'Exam2.bbl' not found.
 
-No file Exam1.bbl.
+No file Exam2.bbl.
 Package biblatex Info: Reference section=0 on input line 66.
 Package biblatex Info: Reference segment=0 on input line 66.
 
@@ -839,7 +839,7 @@ Overfull \hbox (30.0pt too wide) in paragraph at lines 136--137
  []
 
 
-Overfull \hbox (30.0pt too wide) in paragraph at lines 150--151
+Overfull \hbox (30.0pt too wide) in paragraph at lines 156--157
 [][] 
  []
 
@@ -847,52 +847,145 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.166 \newpage
+l.162 \newpage
                [1]
-Overfull \hbox (27.37506pt too wide) in paragraph at lines 183--184
+Overfull \hbox (11.41034pt too wide) in paragraph at lines 187--187
+ []                   \OT1/cmtt/m/n/10 (Intercept)         age    page_count   
+      price     rating     purchases[] 
+ []
+
+
+Overfull \hbox (11.41034pt too wide) in paragraph at lines 187--187
+ []\OT1/cmtt/m/n/10 General               2.815334  0.02238879  0.0009943770 -0
+.0124937221 -0.9970760 -2.782382e-04[] 
+ []
+
+
+Overfull \hbox (11.41034pt too wide) in paragraph at lines 187--187
+ []\OT1/cmtt/m/n/10 Fantasy             -11.344759  0.02605114  0.0011837241 -0
+.0208921547  2.0684096  4.299147e-04[] 
+ []
+
+
+Overfull \hbox (11.41034pt too wide) in paragraph at lines 187--187
+ []\OT1/cmtt/m/n/10 ComicsGraphicNovel    6.448461 -0.17070209 -0.0137132907  0
+.0007489826 -1.0034271  3.977844e-04[] 
+ []
+
+
+Overfull \hbox (11.41034pt too wide) in paragraph at lines 187--187
+ []\OT1/cmtt/m/n/10 Business              2.786146  0.03669941 -0.0023766062  0
+.0054251860 -1.1447918  4.135807e-04[] 
+ []
+
+
+Overfull \hbox (11.41034pt too wide) in paragraph at lines 187--187
+ []\OT1/cmtt/m/n/10 Mystery               6.183348  0.08923819  0.0005447292 -0
+.0252044648 -1.9463305  1.974567e-05[] 
+ []
+
+
+Overfull \hbox (11.41034pt too wide) in paragraph at lines 187--187
+ []\OT1/cmtt/m/n/10 Fiction              -1.080619 -0.10781100  0.0008696791 -0
+.0136541880  0.1746037  2.242896e-04[] 
+ []
+
+
+Overfull \hbox (27.37506pt too wide) in paragraph at lines 190--191
 [][] 
  []
 
-[2]
-<empirical_log_odds_exam_1.pdf, id=47, 505.89pt x 361.35pt>
-File: empirical_log_odds_exam_1.pdf Graphic file (type pdf)
-<use empirical_log_odds_exam_1.pdf>
-Package pdftex.def Info: empirical_log_odds_exam_1.pdf  used on input line 201.
-
-(pdftex.def)             Requested size: 354.12057pt x 252.94327pt.
-
-Overfull \hbox (27.37506pt too wide) in paragraph at lines 204--205
-[][] 
+[2] [3]
+Overfull \hbox (7.05183pt too wide) in paragraph at lines 216--216
+ []\OT1/cmtt/m/n/10.95 predicted            Other General Fantasy ComicsGraphic
+Novel Business Mystery Fiction[] 
  []
 
-[3 <./empirical_log_odds_exam_1.pdf>]
-Underfull \hbox (badness 10000) in paragraph at lines 211--212
 
+Overfull \hbox (7.05183pt too wide) in paragraph at lines 216--216
+ []  \OT1/cmtt/m/n/10.95 Other                 97      18      16              
+    9       11      12      27[] 
+ []
+
+
+Overfull \hbox (7.05183pt too wide) in paragraph at lines 216--216
+ []  \OT1/cmtt/m/n/10.95 General                0       0       0              
+    0        0       0       0[] 
+ []
+
+
+Overfull \hbox (7.05183pt too wide) in paragraph at lines 216--216
+ []  \OT1/cmtt/m/n/10.95 Fantasy                2       0       2              
+    0        0       0       1[] 
+ []
+
+
+Overfull \hbox (7.05183pt too wide) in paragraph at lines 216--216
+ []  \OT1/cmtt/m/n/10.95 ComicsGraphicNovel     7       0       0              
+   13        2       0       2[] 
+ []
+
+
+Overfull \hbox (7.05183pt too wide) in paragraph at lines 216--216
+ []  \OT1/cmtt/m/n/10.95 Business               2       0       0              
+    0        2       0       0[] 
+ []
+
+
+Overfull \hbox (7.05183pt too wide) in paragraph at lines 216--216
+ []  \OT1/cmtt/m/n/10.95 Mystery                1       2       0              
+    0        0       0       0[] 
+ []
+
+
+Overfull \hbox (7.05183pt too wide) in paragraph at lines 216--216
+ []  \OT1/cmtt/m/n/10.95 Fiction                0       1       0              
+    0        0       0       1[] 
+ []
+
+
+Overfull \hbox (27.37506pt too wide) in paragraph at lines 218--219
+[][] 
  []
 
 [4]
-Overfull \hbox (27.37506pt too wide) in paragraph at lines 268--269
+Overfull \hbox (27.37506pt too wide) in paragraph at lines 224--225
+[][] 
+ []
+
+
+Overfull \hbox (27.37506pt too wide) in paragraph at lines 256--257
 [][] 
  []
 
 [5] [6]
-Overfull \hbox (27.37506pt too wide) in paragraph at lines 303--304
+Overfull \hbox (27.37506pt too wide) in paragraph at lines 290--291
 [][] 
  []
 
-[7] [8] (./Exam1.aux)
-Package rerunfilecheck Info: File `Exam1.out' has not changed.
+
+Overfull \hbox (27.37506pt too wide) in paragraph at lines 304--305
+[][] 
+ []
+
+[7]
+Overfull \hbox (27.37506pt too wide) in paragraph at lines 335--336
+[][] 
+ []
+
+[8] [9] (./Exam2.aux)
+Package rerunfilecheck Info: File `Exam2.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
-Package logreq Info: Writing requests to 'Exam1.run.xml'.
-\openout1 = `Exam1.run.xml'.
+Package logreq Info: Writing requests to 'Exam2.run.xml'.
+\openout1 = `Exam2.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 17427 strings out of 478994
- 291047 string characters out of 5858184
- 1024406 words of memory out of 5000000
- 34647 multiletter control sequences out of 15000+600000
- 412144 words of font info for 61 fonts, out of 8000000 for 9000
+ 17421 strings out of 478994
+ 290849 string characters out of 5858184
+ 1026406 words of memory out of 5000000
+ 34645 multiletter control sequences out of 15000+600000
+ 412312 words of font info for 62 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  73i,5n,74p,738b,759s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
@@ -903,15 +996,14 @@ usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></us
 r/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/
 local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/lo
 cal/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/loca
-l/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/t
-exlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/te
-xlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/tex
-live/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texl
-ive/2021/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb>
-Output written on Exam1.pdf (10 pages, 156770 bytes).
+l/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/
+texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/t
+exlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/te
+xlive/2021/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb>
+Output written on Exam2.pdf (11 pages, 144896 bytes).
 PDF statistics:
- 133 PDF objects out of 1000 (max. 8388607)
- 105 compressed objects within 2 object streams
- 31 named destinations out of 1000 (max. 500000)
- 6 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 121 PDF objects out of 1000 (max. 8388607)
+ 96 compressed objects within 1 object stream
+ 28 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
