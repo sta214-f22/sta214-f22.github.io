@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Inference with mixed effects models</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs-2.16/header-attrs.js"></script>
+    <link rel="stylesheet" href="lab-slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Inference with mixed effects models
+]
+
+---
+
+
+### Data: flipped classrooms?
+
+.large[
+Data set has 375 rows (one per student), and the following variables:
+
+* `professor`: which professor taught the class (1 -- 15)
+* `style`: which teaching style the professor used (no flip, some flip, fully flipped)
+* `score`: the student's score on the final exam
+]
+
+---
+
+### Inference with linear models
+
+.large[
+`\begin{align}
+Score_i &amp;= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + \varepsilon_{i}
+\end{align}`
+
+**Research question:** Is there a relationship between teaching style and student score?
+
+.question[
+What are my null and alternative hypotheses, in terms of one or more model parameters?
+]
+]
+
+---
+
+### Inference with linear models
+
+.large[
+`\begin{align}
+Score_i &amp;= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + \varepsilon_{i}
+\end{align}`
+
+**Research question:** Is there a relationship between teaching style and student score?
+
+`\(H_0: \beta_1 = \beta_2 = 0\)`
+
+`\(H_A: \text{at least one of } \beta_1, \beta_2 \neq 0\)`
+
+.question[
+What test would I use to test these hypotheses?
+]
+]
+
+---
+
+### F tests
+
+.large[
+`\begin{align}
+Score_i &amp;= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + \varepsilon_{i}
+\end{align}`
+
+**Research question:** Is there a relationship between teaching style and student score?
+
+`\(H_0: \beta_1 = \beta_2 = 0\)`
+
+`\(H_A: \text{at least one of } \beta_1, \beta_2 \neq 0\)`
+
+.question[
+What are my degrees of freedom for the F test?
+]
+]
+
+---
+
+### F tests for mixed effects models
+
+.large[
+`\begin{align}
+Score_{ij} &amp;= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + u_i + \varepsilon_{ij}
+\end{align}`
+
+**Research question:** Is there a relationship between teaching style and student score?
+
+.question[
+What are my null and alternative hypotheses, in terms of one or more model parameters?
+]
+]
+
+---
+
+### F tests for mixed effects models
+
+.large[
+`\begin{align}
+Score_{ij} &amp;= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + u_i + \varepsilon_{ij}
+\end{align}`
+
+**Research question:** Is there a relationship between teaching style and student score?
+
+`\(H_0: \beta_1 = \beta_2 = 0\)`
+
+`\(H_A: \text{at least one of } \beta_1, \beta_2 \neq 0\)`
+
+**Test:** We will use an F test again
+
+* numerator df = number of parameters tested = 2
+* denominator df = ??
+]
+
+---
+
+### What *are* degrees of freedom?
+
+.large[
+Suppose we want to estimate the mean `\(\mu\)` of a distribution. We observe `\(n\)` observations `\(X_1,...,X_n\)`, and calculate the sample mean
+
+`$$\overline{X} = \dfrac{X_1 + X_2 + \cdots + X_n}{n}$$`
+.question[
+Suppose we know the value of `\(\overline{X}\)`. How many of the values `\(X_1,...,X_n\)` are "free to vary" (i.e., can be any number they want)?
+]
+]
+---
+
+### Example: simple linear regression
+
+.large[
+Observe `\((X_1, Y_1), ..., (X_n, Y_n)\)` and calculate
+`$$\widehat{Y}_i = \widehat{\beta}_0 + \widehat{\beta}_1 X_i$$`
+
+.question[
+What are my degrees of freedom?
+]
+]
+
+---
+
+### Denominator degrees of freedom for mixed models
+
+.large[
+`\begin{align}
+Score_{ij} &amp;= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + u_i + \varepsilon_{ij}
+\end{align}`
+
+`\(H_0: \beta_1 = \beta_2 = 0 \hspace{1cm} H_A: \text{at least one of } \beta_1, \beta_2 \neq 0\)`
+
+**Test:** We will use an F test again
+
+* numerator df = number of parameters tested = 2
+* denominator df = 
+
+`$$\text{number of independent observations} - \text{number of parameters}$$`
+
+.question[
+Are all observations independent?
+]
+]
+
+---
+
+### Bounds on the denominator degrees of freedom
+
+.large[
+`\begin{align}
+Score_{ij} &amp;= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + u_i + \varepsilon_{ij}
+\end{align}`
+]
+
+.large[
+
+`\(u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)\)`
+
+`\(\# \ \text{groups} - p \ \leq \ \text{denominator df} \ \leq \ n - p\)`
+
+* `\(p =\)` number of parameters in full model
+* `\(n =\)` total number of observations
+]
+
+---
+
+### Approximating the degrees of freedom
+
+.large[
+
+
+
+```r
+library(lme4)
+library(lmerTest)
+m1 &lt;- lmer(score ~ style + (1|professor), 
+           data = teaching)
+anova(m1)
+```
+
+```
+## Type III Analysis of Variance Table with Satterthwaite's method
+##       Sum Sq Mean Sq NumDF DenDF F value   Pr(&gt;F)   
+## style 65.437  32.718     2    12  7.6949 0.007072 **
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+* The `lmerTest` package approximates degrees of freedom with *Satterthwaite's method* (details are beyond the scope of this course)
+* This allows us to calculate (approximate) p-values
+]
+
+---
+
+### Why degrees of freedom matter
+
+.large[
+* If we use the wrong degrees of freedom, we get the wrong p-value
+* Often this means our p-value is smaller than it should be (we overestimate the strength of evidence)
+
+
+Using the correct degrees of freedom: 
+
+
+```r
+pf(7.69, 2, 12, lower.tail=F)
+```
+
+```
+## [1] 0.007087398
+```
+
+If we just did `\(n - p\)` (wrong):
+
+
+```r
+pf(7.69, 2, 372, lower.tail=F)
+```
+
+```
+## [1] 0.0005339106
+```
+]
+
+---
+
+### Class activity
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_28.html](https://sta214-f22.github.io/class_activities/ca_lecture_28.html)
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+There are 1561 rentals in 43 neighborhoods. What are the lower and upper bounds on the denominator degrees of freedom?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+
+.question[
+What is the approximate denominator df, using Satterthwaite's method?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+Do we have evidence for a relationship between overall satisfaction and price?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+`$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$`
+`\(u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)\)`
+
+where `\(Price_{ij}\)` is the price of rental `\(j\)` in neighborhood `\(i\)`
+]
+
+.large[
+.question[
+What assumptions are we making in this mixed effects model?
+]
+]
+
+---
+
+### Assumptions
+
+.large[
+`$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$`
+`\(u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)\)`
+]
+
+.large[
+* **Shape:** 
+  * the overall relationship between satisfaction and price is linear
+  * The slope is the *same* for each neighborhood
+]
+
+---
+
+### Assumptions
+
+.large[
+`$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$`
+`\(u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)\)`
+]
+
+.large[
+* **Independence:** 
+  * random effects are independent
+  * observations within neighborhoods are independent after accounting for the random effect (i.e., the random effect captures the correlation within neighborhoods)
+  * observations from different neighborhoods are independent
+]
+
+---
+
+### Assumptions
+
+.large[
+`$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$`
+`\(u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)\)`
+]
+
+.large[
+* **Normality:** Both `\(u_i \sim N(0, \sigma_u^2)\)` and `\(\varepsilon_{ij} \sim N(0, \sigma_\varepsilon^2)\)`
+* **Constant variance:** 
+  * `\(\varepsilon_{ij}\)` has the same variance `\(\sigma_\varepsilon^2\)` regardless of satisfaction or neighborhood
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

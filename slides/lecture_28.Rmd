@@ -1,0 +1,338 @@
+---
+title: Inference with mixed effects models
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+### Data: flipped classrooms?
+
+.large[
+Data set has 375 rows (one per student), and the following variables:
+
+* `professor`: which professor taught the class (1 -- 15)
+* `style`: which teaching style the professor used (no flip, some flip, fully flipped)
+* `score`: the student's score on the final exam
+]
+
+---
+
+### Inference with linear models
+
+.large[
+\begin{align}
+Score_i &= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + \varepsilon_{i}
+\end{align}
+
+**Research question:** Is there a relationship between teaching style and student score?
+
+.question[
+What are my null and alternative hypotheses, in terms of one or more model parameters?
+]
+]
+
+---
+
+### Inference with linear models
+
+.large[
+\begin{align}
+Score_i &= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + \varepsilon_{i}
+\end{align}
+
+**Research question:** Is there a relationship between teaching style and student score?
+
+$H_0: \beta_1 = \beta_2 = 0$
+
+$H_A: \text{at least one of } \beta_1, \beta_2 \neq 0$
+
+.question[
+What test would I use to test these hypotheses?
+]
+]
+
+---
+
+### F tests
+
+.large[
+\begin{align}
+Score_i &= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + \varepsilon_{i}
+\end{align}
+
+**Research question:** Is there a relationship between teaching style and student score?
+
+$H_0: \beta_1 = \beta_2 = 0$
+
+$H_A: \text{at least one of } \beta_1, \beta_2 \neq 0$
+
+.question[
+What are my degrees of freedom for the F test?
+]
+]
+
+---
+
+### F tests for mixed effects models
+
+.large[
+\begin{align}
+Score_{ij} &= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + u_i + \varepsilon_{ij}
+\end{align}
+
+**Research question:** Is there a relationship between teaching style and student score?
+
+.question[
+What are my null and alternative hypotheses, in terms of one or more model parameters?
+]
+]
+
+---
+
+### F tests for mixed effects models
+
+.large[
+\begin{align}
+Score_{ij} &= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + u_i + \varepsilon_{ij}
+\end{align}
+
+**Research question:** Is there a relationship between teaching style and student score?
+
+$H_0: \beta_1 = \beta_2 = 0$
+
+$H_A: \text{at least one of } \beta_1, \beta_2 \neq 0$
+
+**Test:** We will use an F test again
+
+* numerator df = number of parameters tested = 2
+* denominator df = ??
+]
+
+---
+
+### What *are* degrees of freedom?
+
+.large[
+Suppose we want to estimate the mean $\mu$ of a distribution. We observe $n$ observations $X_1,...,X_n$, and calculate the sample mean
+
+$$\overline{X} = \dfrac{X_1 + X_2 + \cdots + X_n}{n}$$
+.question[
+Suppose we know the value of $\overline{X}$. How many of the values $X_1,...,X_n$ are "free to vary" (i.e., can be any number they want)?
+]
+]
+---
+
+### Example: simple linear regression
+
+.large[
+Observe $(X_1, Y_1), ..., (X_n, Y_n)$ and calculate
+$$\widehat{Y}_i = \widehat{\beta}_0 + \widehat{\beta}_1 X_i$$
+
+.question[
+What are my degrees of freedom?
+]
+]
+
+---
+
+### Denominator degrees of freedom for mixed models
+
+.large[
+\begin{align}
+Score_{ij} &= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + u_i + \varepsilon_{ij}
+\end{align}
+
+$H_0: \beta_1 = \beta_2 = 0 \hspace{1cm} H_A: \text{at least one of } \beta_1, \beta_2 \neq 0$
+
+**Test:** We will use an F test again
+
+* numerator df = number of parameters tested = 2
+* denominator df = 
+
+$$\text{number of independent observations} - \text{number of parameters}$$
+
+.question[
+Are all observations independent?
+]
+]
+
+---
+
+### Bounds on the denominator degrees of freedom
+
+.large[
+\begin{align}
+Score_{ij} &= \beta_0 + \beta_1 \text{SomeFlipped}_i + \beta_2 \text{FullyFlipped}_i + u_i + \varepsilon_{ij}
+\end{align}
+]
+
+.large[
+
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+
+$\# \ \text{groups} - p \ \leq \ \text{denominator df} \ \leq \ n - p$
+
+* $p =$ number of parameters in full model
+* $n =$ total number of observations
+]
+
+---
+
+### Approximating the degrees of freedom
+
+.large[
+```{r include=F}
+library(tidyverse)
+set.seed(3)
+mean_scores <- c(rnorm(5, 80, 6), rnorm(5, 87, 6), rnorm(5, 83, 6))
+
+teaching <- data.frame(professor = rep(1:15, each=25),
+           style = factor(rep(c("no flip", "some flip", "full flip"),
+                                 each=125),
+                             levels = c("no flip", "some flip", "full flip"))) %>%
+  mutate(score = rnorm(375, mean = mean_scores[professor], sd = 2),
+         professor = as.factor(professor))
+```
+
+```{r message=F, warning=F}
+library(lme4)
+library(lmerTest)
+m1 <- lmer(score ~ style + (1|professor), 
+           data = teaching)
+anova(m1)
+```
+
+* The `lmerTest` package approximates degrees of freedom with *Satterthwaite's method* (details are beyond the scope of this course)
+* This allows us to calculate (approximate) p-values
+]
+
+---
+
+### Why degrees of freedom matter
+
+.large[
+* If we use the wrong degrees of freedom, we get the wrong p-value
+* Often this means our p-value is smaller than it should be (we overestimate the strength of evidence)
+
+
+Using the correct degrees of freedom: 
+
+```{r}
+pf(7.69, 2, 12, lower.tail=F)
+```
+
+If we just did $n - p$ (wrong):
+
+```{r}
+pf(7.69, 2, 372, lower.tail=F)
+```
+]
+
+---
+
+### Class activity
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_28.html](https://sta214-f22.github.io/class_activities/ca_lecture_28.html)
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+There are 1561 rentals in 43 neighborhoods. What are the lower and upper bounds on the denominator degrees of freedom?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+
+.question[
+What is the approximate denominator df, using Satterthwaite's method?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+.question[
+Do we have evidence for a relationship between overall satisfaction and price?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+
+where $Price_{ij}$ is the price of rental $j$ in neighborhood $i$
+]
+
+.large[
+.question[
+What assumptions are we making in this mixed effects model?
+]
+]
+
+---
+
+### Assumptions
+
+.large[
+$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+]
+
+.large[
+* **Shape:** 
+  * the overall relationship between satisfaction and price is linear
+  * The slope is the *same* for each neighborhood
+]
+
+---
+
+### Assumptions
+
+.large[
+$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+]
+
+.large[
+* **Independence:** 
+  * random effects are independent
+  * observations within neighborhoods are independent after accounting for the random effect (i.e., the random effect captures the correlation within neighborhoods)
+  * observations from different neighborhoods are independent
+]
+
+---
+
+### Assumptions
+
+.large[
+$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+]
+
+.large[
+* **Normality:** Both $u_i \sim N(0, \sigma_u^2)$ and $\varepsilon_{ij} \sim N(0, \sigma_\varepsilon^2)$
+* **Constant variance:** 
+  * $\varepsilon_{ij}$ has the same variance $\sigma_\varepsilon^2$ regardless of satisfaction or neighborhood
+]

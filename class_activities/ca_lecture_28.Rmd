@@ -1,0 +1,46 @@
+---
+title: "Class Activity, November 14"
+output: 
+  tufte::tufte_html:
+    css: "lab.css"
+    tufte_variant: "envisioned"
+    highlight: pygments
+link-citations: yes
+---
+
+We have data on prices and other information for 1561 Airbnb rentals in Chicago, Illinois. Our goal is to model the relationship between price and overall satisfaction score. The information comes from 43 neighborhoods, and we have information on between 25 to 50 rentals per neighborhood. The variables we will be using are as follows:
+
+* `price`: The price in US dollars of a one night rental
+* `overallSatisfaction`: an average satisfaction score, given as numbers between 2.5 and 5
+* `neighborhood`: the neighborhood in which the rental is located
+
+We use the mixed effects model
+
+$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+
+The researchers are interested in whether there is a relationship between satisfaction and price, so their hypotheses are
+
+$H_0: \beta_1 = 0 \hspace{1cm} H_A: \beta_1 \neq 0$
+
+The researchers plan to use an F test.
+
+1. What are the lower and upper bounds on the denominator degrees of freedom for testing these hypotheses?
+
+To approximate the degrees of freedom, we will use the `lmerTest` package, which approximates degrees of freedom with Satterthwaite's method. Make sure the `lmerTest` package is installed, then run the following code:
+
+```{r eval=F}
+library(lme4)
+library(lmerTest)
+
+bnb <- read.csv("https://raw.githubusercontent.com/proback/BYSH/master/data/airbnb.csv")
+
+m1 <- lmer(price ~ overall_satisfaction + (1 | neighborhood), data = bnb)
+anova(m1)
+```
+
+2. What is the approximate denominator degrees of freedom, using Satterthwaite's method?
+
+3. Do we have evidence for a relationship between overall satisfaction and price?
+
+4. Whenever we do inference with a statistical model, we are making assumptions. For example, in linear regression we have assumptions like shape, constant variance, normality, independence, and randomness. What assumptions does our mixed effects model make?

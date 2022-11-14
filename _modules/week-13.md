@@ -1,14 +1,15 @@
 ---
-title: Random slopes
+title: Inference with mixed effects models
 ---
 
 November 14
-: Mixed effects model assumptions
+: Inference with mixed effects models
+  : [Slides](https://sta214-f22.github.io/slides/lecture_28.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture_28.html)
 
 : **Lab 8 due**{: .label .label-red }
   
 November 16
-: Random slopes
+: Mixed effects model assumptions
 
 November 18
 : Random slopes
