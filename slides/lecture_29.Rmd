@@ -1,0 +1,432 @@
+---
+title: Mixed model assumptions
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+### Last time: mixed model assumptions
+
+.large[
+$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+]
+
+.large[
+* **Shape assumption:** 
+  * the overall relationship between satisfaction and price is linear
+  * The slope is the *same* for each neighborhood
+* **Constant variance assumption:** 
+  * $\varepsilon_{ij}$ has the same variance $\sigma_\varepsilon^2$ regardless of satisfaction or neighborhood
+  
+.question[
+How do you think we could check the shape and constant variance assumptions?
+]
+]
+
+---
+
+### Residual plots
+
+.large[
+Residuals: $Price_{ij} - \widehat{Price}_{ij}$, where
+
+$$\widehat{Price}_{ij} = \widehat{\beta}_0 + \widehat{\beta}_1 Satisfaction_{ij} + \widehat{u}_i$$
+
+```{r message=F, warning=F, echo=F, fig.align='center', fig.height=5, fig.width=7}
+library(lme4)
+library(tidyverse)
+library(knitr)
+
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+   lines <- options$output.lines
+   if (is.null(lines)) {
+     return(hook_output(x, options))  # pass to default hook
+   }
+   x <- unlist(strsplit(x, "\n"))
+   more <- "..."
+   if (length(lines)==1) {        # first n lines
+     if (length(x) > lines) {
+       # truncate the output, but add ....
+       x <- c(head(x, lines), more)
+     }
+   } else {
+     x <- c(more, x[lines], more)
+   }
+   # paste these lines together
+   x <- paste(c(x, ""), collapse = "\n")
+   hook_output(x, options)
+ })
+
+bnb <- read.csv("https://raw.githubusercontent.com/proback/BYSH/master/data/airbnb.csv")
+m1 <- lmer(price ~ overall_satisfaction + (1 | neighborhood), data = bnb)
+
+bnb %>%
+  mutate(resids = residuals(m1),
+         preds = predict(m1)) %>%
+  ggplot(aes(x = preds, y = resids)) +
+  geom_point(size=2) +
+  geom_abline(slope = 0, intercept = 0, color="blue", lwd=1.2) +
+  labs(x = "Predicted price", 
+       y = "Residual") +
+  theme_bw() +
+  theme(text = element_text(size = 25))
+```
+]
+
+---
+
+### Residual plots
+
+```{r message=F, warning=F, echo=F, fig.align='center', fig.height=5, fig.width=7}
+
+bnb %>%
+  mutate(resids = residuals(m1),
+         preds = predict(m1)) %>%
+  ggplot(aes(x = preds, y = resids)) +
+  geom_point(size=2) +
+  geom_abline(slope = 0, intercept = 0, color="blue", lwd=1.2) +
+  labs(x = "Predicted price", 
+       y = "Residual") +
+  theme_bw() +
+  theme(text = element_text(size = 25))
+```
+
+.large[
+.question[
+Do the shape and constant variance assumptions look reasonable?
+]
+]
+
+---
+
+### Checking assumptions
+
+.large[
+$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+]
+
+.large[
+* **Normality assumption:** Both $u_i \sim N(0, \sigma_u^2)$ and $\varepsilon_{ij} \sim N(0, \sigma_\varepsilon^2)$
+  
+.question[
+How do you think we could check the normality assumption?
+]
+]
+
+---
+
+### QQ plots
+
+.large[
+**Assumption:** $u_i \sim N(0, \sigma_u^2)$
+
+* Check whether the random effect estimates $\widehat{u}_i$ appear normal with a QQ plot
+
+**Assumption:** $\varepsilon_{ij} \sim N(0, \sigma_\varepsilon^2)$
+
+* Check whether the residuals appear normal with a QQ plot
+]
+
+---
+
+### QQ plot for the residuals
+
+```{r message=F, warning=F, echo=F, fig.align='center', fig.height=5, fig.width=7}
+
+bnb %>%
+  mutate(resids = residuals(m1)) %>%
+  ggplot(aes(sample = resids)) +
+  geom_qq(size=2) +
+  geom_qq_line(color="blue", lwd=1.2) +
+  labs(x = "Theoretical normal quantiles", 
+       y = "Observed residual quantiles") +
+  theme_bw() +
+  theme(text = element_text(size = 25))
+```
+
+.large[
+.question[
+Do the residuals appear normal?
+]
+]
+
+---
+
+### QQ plots for random effects
+
+.large[
+To create a QQ plot for the random effects, I need estimates $\widehat{u}_i$ of the random effects for each group.
+
+.question[
+How would I calculate $\widehat{u}_i$?
+]
+]
+
+---
+
+### Estimated random effects
+
+.large[
+R calculates an estimated random effect for each group (i.e., neighborhood):
+
+```{r}
+m1 <- lmer(price ~ overall_satisfaction + 
+             (1 | neighborhood), 
+           data = bnb)
+coef(m1)
+```
+]
+
+---
+
+### Estimated random effects
+
+.large[
+
+```{r, output.lines = 2:8}
+coef(m1)
+```
+
+.question[
+What is the same for every neighborhood?
+]
+]
+
+---
+
+### Estimated random effects
+
+.large[
+
+```{r, output.lines = 2:8}
+coef(m1)
+```
+
+.question[
+What is *different* for each neighborhood?
+]
+]
+
+---
+
+### Estimated random effects
+
+.large[
+
+```{r, echo=F, output.lines = 2:8}
+coef(m1)
+```
+
+.question[
+How do I get the random effect estimates $\widehat{u}_i$ ?
+]
+]
+
+---
+
+### QQ plot for the random effects
+
+```{r message=F, warning=F, echo=F, fig.align='center', fig.height=5, fig.width=7}
+
+data.frame(re = coef(m1)$neighborhood[,1] - summary(m1)$coefficients[2,1]) %>%
+  ggplot(aes(sample = re)) +
+  geom_qq(size=2) +
+  geom_qq_line(color="blue", lwd=1.2) +
+  labs(x = "Theoretical normal quantiles", 
+       y = "Observed random effect quantiles") +
+  theme_bw() +
+  theme(text = element_text(size = 20))
+```
+
+.large[
+.question[
+Do the random effects appear normal?
+]
+]
+
+---
+
+### Addressing assumption violations
+
+
+.pull-left[
+```{r message=F, warning=F, echo=F, fig.align='center', fig.height=4, fig.width=6}
+
+bnb %>%
+  mutate(resids = residuals(m1)) %>%
+  ggplot(aes(sample = resids)) +
+  geom_qq(size=2) +
+  geom_qq_line(color="blue", lwd=1.2) +
+  labs(x = "Theoretical normal quantiles", 
+       y = "Observed residual quantiles") +
+  theme_bw() +
+  theme(text = element_text(size = 20))
+```
+]
+
+.pull-right[
+```{r message=F, warning=F, echo=F, fig.align='center', fig.height=4, fig.width=6}
+
+data.frame(re = coef(m1)$neighborhood[,1] - summary(m1)$coefficients[2,1]) %>%
+  ggplot(aes(sample = re)) +
+  geom_qq(size=2) +
+  geom_qq_line(color="blue", lwd=1.2) +
+  labs(x = "Theoretical normal quantiles", 
+       y = "Observed random effect quantiles") +
+  theme_bw() +
+  theme(text = element_text(size = 20))
+```
+]
+
+.large[
+.question[
+How could we address violations of the normality assumptions?
+]
+]
+
+---
+
+### Transformations
+
+.large[
+$$\log(Price_{ij}) = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+]
+
+```{r include =F}
+m1 <- lmer(log(price) ~ overall_satisfaction + (1 | neighborhood), data = bnb)
+```
+
+.pull-left[
+```{r message=F, warning=F, echo=F, fig.align='center', fig.height=4, fig.width=6}
+
+bnb %>%
+  mutate(resids = residuals(m1)) %>%
+  ggplot(aes(sample = resids)) +
+  geom_qq(size=2) +
+  geom_qq_line(color="blue", lwd=1.2) +
+  labs(x = "Theoretical normal quantiles", 
+       y = "Observed residual quantiles") +
+  theme_bw() +
+  theme(text = element_text(size = 20))
+```
+]
+
+.pull-right[
+```{r message=F, warning=F, echo=F, fig.align='center', fig.height=4, fig.width=6}
+
+data.frame(re = coef(m1)$neighborhood[,1] - summary(m1)$coefficients[2,1]) %>%
+  ggplot(aes(sample = re)) +
+  geom_qq(size=2) +
+  geom_qq_line(color="blue", lwd=1.2) +
+  labs(x = "Theoretical normal quantiles", 
+       y = "Observed random effect quantiles") +
+  theme_bw() +
+  theme(text = element_text(size = 20))
+```
+]
+
+
+---
+
+### Revisiting the shape assumption
+
+.large[
+$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$
+$u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$
+]
+
+.large[
+* This model assumes that the slope is the same for each neighborhood
+
+.question[
+How can we change the model to allow the slope to be *different* in different neighborhoods? Discuss with your neighbor for 1-2 minutes, and try to write down what the model would look like. Then we will discuss as a group.
+]
+]
+
+---
+
+### Adding random slopes
+
+.large[
+$$Price_{ij} = \beta_0 + u_i + (\beta_1 + v_i) Satisfaction_{ij} + \varepsilon_{ij}$$
+
+* $\beta_0$ = mean price when satisfaction is 0 (average across neighborhoods)
+* $\beta_0 + u_i$ = mean price when satisfaction is 0 in neighborhood $i$
+* $\beta_1$ = average change in price for a one-unit increase in satisfaction (average across neighborhoods)
+* $\beta_1 + v_i$ = average change in price for a one-unit increase in satisfaction in neighborhood $i$
+]
+
+---
+
+### Class activity
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_29.html](https://sta214-f22.github.io/class_activities/ca_lecture_29.html)
+]
+
+---
+
+### Class activity
+
+.large[
+Mixed effects models are useful when there are group effects in our data.
+
+.question[
+What are the groups in the data, and what are the observations within each group?
+]
+]
+
+
+---
+
+### Class activity
+
+.large[
+The researchers hypothesize that anxiety levels depend on the type of performance (large or small ensembles), and that the difference in anxiety levels between large and small ensembles varies from person to person.
+
+.question[
+What mixed effects model should the researchers use to investigate their hypothesis?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$
+
+.question[
+Interpret the fixed effects and random effects in the model.
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$
+
+.question[
+Interpret the fixed effects and random effects in the model.
+]
+]
+
+.large[
+* $\beta_0$ = average performance anxiety before small ensemble and solo performances (average across musicians)
+* $\beta_0 + u_i$ = average performance anxiety before small ensemble and solo performances for musician $i$
+* $\beta_1$ = average difference in anxiety before large ensemble performances (compared to small/solo performances) (average across musicians)
+* $\beta_1 + v_i$ = average difference in anxiety before large ensemble performances for musician $i$
+]

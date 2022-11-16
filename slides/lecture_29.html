@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Mixed model assumptions</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs-2.16/header-attrs.js"></script>
+    <link rel="stylesheet" href="lab-slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Mixed model assumptions
+]
+
+---
+
+
+### Last time: mixed model assumptions
+
+.large[
+`$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$`
+`\(u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)\)`
+]
+
+.large[
+* **Shape assumption:** 
+  * the overall relationship between satisfaction and price is linear
+  * The slope is the *same* for each neighborhood
+* **Constant variance assumption:** 
+  * `\(\varepsilon_{ij}\)` has the same variance `\(\sigma_\varepsilon^2\)` regardless of satisfaction or neighborhood
+  
+.question[
+How do you think we could check the shape and constant variance assumptions?
+]
+]
+
+---
+
+### Residual plots
+
+.large[
+Residuals: `\(Price_{ij} - \widehat{Price}_{ij}\)`, where
+
+`$$\widehat{Price}_{ij} = \widehat{\beta}_0 + \widehat{\beta}_1 Satisfaction_{ij} + \widehat{u}_i$$`
+
+&lt;img src="lecture_29_files/figure-html/unnamed-chunk-1-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+### Residual plots
+
+&lt;img src="lecture_29_files/figure-html/unnamed-chunk-2-1.png" style="display: block; margin: auto;" /&gt;
+
+.large[
+.question[
+Do the shape and constant variance assumptions look reasonable?
+]
+]
+
+---
+
+### Checking assumptions
+
+.large[
+`$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$`
+`\(u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)\)`
+]
+
+.large[
+* **Normality assumption:** Both `\(u_i \sim N(0, \sigma_u^2)\)` and `\(\varepsilon_{ij} \sim N(0, \sigma_\varepsilon^2)\)`
+  
+.question[
+How do you think we could check the normality assumption?
+]
+]
+
+---
+
+### QQ plots
+
+.large[
+**Assumption:** `\(u_i \sim N(0, \sigma_u^2)\)`
+
+* Check whether the random effect estimates `\(\widehat{u}_i\)` appear normal with a QQ plot
+
+**Assumption:** `\(\varepsilon_{ij} \sim N(0, \sigma_\varepsilon^2)\)`
+
+* Check whether the residuals appear normal with a QQ plot
+]
+
+---
+
+### QQ plot for the residuals
+
+&lt;img src="lecture_29_files/figure-html/unnamed-chunk-3-1.png" style="display: block; margin: auto;" /&gt;
+
+.large[
+.question[
+Do the residuals appear normal?
+]
+]
+
+---
+
+### QQ plots for random effects
+
+.large[
+To create a QQ plot for the random effects, I need estimates `\(\widehat{u}_i\)` of the random effects for each group.
+
+.question[
+How would I calculate `\(\widehat{u}_i\)`?
+]
+]
+
+---
+
+### Estimated random effects
+
+.large[
+R calculates an estimated random effect for each group (i.e., neighborhood):
+
+
+```r
+m1 &lt;- lmer(price ~ overall_satisfaction + 
+             (1 | neighborhood), 
+           data = bnb)
+coef(m1)
+```
+
+```
+## $neighborhood
+##                    (Intercept) overall_satisfaction
+## Albany Park          16.367331             14.80912
+## Archer Heights        9.863461             14.80912
+## Avondale             40.533851             14.80912
+## Beverly              21.046464             14.80912
+## Bridgeport           13.304517             14.80912
+## Brighton Park        28.548742             14.80912
+## Burnside             12.741349             14.80912
+## Calumet Heights      11.465091             14.80912
+## East Garfield Park   17.716775             14.80912
+## Edgewater            25.258703             14.80912
+## Edison Park          34.801582             14.80912
+## Englewood            21.355893             14.80912
+## Gage Park            -6.126543             14.80912
+## Hegewisch            17.426355             14.80912
+## Hermosa              25.472241             14.80912
+## Humboldt Park        22.545002             14.80912
+## Hyde Park            17.891224             14.80912
+## Irving Park          72.262770             14.80912
+## Jefferson Park       17.514711             14.80912
+## Kenwood              17.200203             14.80912
+## Lincoln Park         85.250408             14.80912
+## Lincoln Square       35.694879             14.80912
+## Logan Square         27.603059             14.80912
+## McKinley Park        11.044588             14.80912
+## Montclare            44.373353             14.80912
+## Morgan Park          13.069163             14.80912
+## Near West Side       79.500680             14.80912
+## North Center         38.257529             14.80912
+## North Park           31.212856             14.80912
+## O'Hare               16.743446             14.80912
+## Portage Park          5.146120             14.80912
+## Pullman              22.192900             14.80912
+## Rogers Park          11.717668             14.80912
+## South Chicago       -12.195538             14.80912
+## South Shore           9.005313             14.80912
+## The Loop            117.374238             14.80912
+## Uptown               56.283131             14.80912
+## Washington Park      13.260523             14.80912
+## West Elsdon          21.163240             14.80912
+## West Englewood       25.084838             14.80912
+## West Lawn             3.579226             14.80912
+## West Town            67.600637             14.80912
+## Woodlawn             12.676532             14.80912
+## 
+## attr(,"class")
+## [1] "coef.mer"
+```
+]
+
+---
+
+### Estimated random effects
+
+.large[
+
+
+```r
+coef(m1)
+```
+
+```
+...
+##                    (Intercept) overall_satisfaction
+## Albany Park          16.367331             14.80912
+## Archer Heights        9.863461             14.80912
+## Avondale             40.533851             14.80912
+## Beverly              21.046464             14.80912
+## Bridgeport           13.304517             14.80912
+## Brighton Park        28.548742             14.80912
+...
+```
+
+.question[
+What is the same for every neighborhood?
+]
+]
+
+---
+
+### Estimated random effects
+
+.large[
+
+
+```r
+coef(m1)
+```
+
+```
+...
+##                    (Intercept) overall_satisfaction
+## Albany Park          16.367331             14.80912
+## Archer Heights        9.863461             14.80912
+## Avondale             40.533851             14.80912
+## Beverly              21.046464             14.80912
+## Bridgeport           13.304517             14.80912
+## Brighton Park        28.548742             14.80912
+...
+```
+
+.question[
+What is *different* for each neighborhood?
+]
+]
+
+---
+
+### Estimated random effects
+
+.large[
+
+
+```
+...
+##                    (Intercept) overall_satisfaction
+## Albany Park          16.367331             14.80912
+## Archer Heights        9.863461             14.80912
+## Avondale             40.533851             14.80912
+## Beverly              21.046464             14.80912
+## Bridgeport           13.304517             14.80912
+## Brighton Park        28.548742             14.80912
+...
+```
+
+.question[
+How do I get the random effect estimates `\(\widehat{u}_i\)` ?
+]
+]
+
+---
+
+### QQ plot for the random effects
+
+&lt;img src="lecture_29_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
+
+.large[
+.question[
+Do the random effects appear normal?
+]
+]
+
+---
+
+### Addressing assumption violations
+
+
+.pull-left[
+&lt;img src="lecture_29_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="lecture_29_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.large[
+.question[
+How could we address violations of the normality assumptions?
+]
+]
+
+---
+
+### Transformations
+
+.large[
+`$$\log(Price_{ij}) = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$`
+`\(u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)\)`
+]
+
+
+
+.pull-left[
+&lt;img src="lecture_29_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="lecture_29_files/figure-html/unnamed-chunk-13-1.png" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+
+### Revisiting the shape assumption
+
+.large[
+`$$Price_{ij} = \beta_0 + \beta_1 Satisfaction_{ij} + u_i + \varepsilon_{ij}$$`
+`\(u_i \overset{iid}{\sim} N(0, \sigma_u^2) \hspace{1cm} \varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)\)`
+]
+
+.large[
+* This model assumes that the slope is the same for each neighborhood
+
+.question[
+How can we change the model to allow the slope to be *different* in different neighborhoods? Discuss with your neighbor for 1-2 minutes, and try to write down what the model would look like. Then we will discuss as a group.
+]
+]
+
+---
+
+### Adding random slopes
+
+.large[
+`$$Price_{ij} = \beta_0 + u_i + (\beta_1 + v_i) Satisfaction_{ij} + \varepsilon_{ij}$$`
+
+* `\(\beta_0\)` = mean price when satisfaction is 0 (average across neighborhoods)
+* `\(\beta_0 + u_i\)` = mean price when satisfaction is 0 in neighborhood `\(i\)`
+* `\(\beta_1\)` = average change in price for a one-unit increase in satisfaction (average across neighborhoods)
+* `\(\beta_1 + v_i\)` = average change in price for a one-unit increase in satisfaction in neighborhood `\(i\)`
+]
+
+---
+
+### Class activity
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_29.html](https://sta214-f22.github.io/class_activities/ca_lecture_29.html)
+]
+
+---
+
+### Class activity
+
+.large[
+Mixed effects models are useful when there are group effects in our data.
+
+.question[
+What are the groups in the data, and what are the observations within each group?
+]
+]
+
+
+---
+
+### Class activity
+
+.large[
+The researchers hypothesize that anxiety levels depend on the type of performance (large or small ensembles), and that the difference in anxiety levels between large and small ensembles varies from person to person.
+
+.question[
+What mixed effects model should the researchers use to investigate their hypothesis?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+`$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$`
+
+.question[
+Interpret the fixed effects and random effects in the model.
+]
+]
+
+---
+
+### Class activity
+
+.large[
+`$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$`
+
+.question[
+Interpret the fixed effects and random effects in the model.
+]
+]
+
+.large[
+* `\(\beta_0\)` = average performance anxiety before small ensemble and solo performances (average across musicians)
+* `\(\beta_0 + u_i\)` = average performance anxiety before small ensemble and solo performances for musician `\(i\)`
+* `\(\beta_1\)` = average difference in anxiety before large ensemble performances (compared to small/solo performances) (average across musicians)
+* `\(\beta_1 + v_i\)` = average difference in anxiety before large ensemble performances for musician `\(i\)`
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
