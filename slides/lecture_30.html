@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Random slopes</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs-2.16/header-attrs.js"></script>
+    <link rel="stylesheet" href="lab-slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Random slopes
+]
+
+---
+
+
+### Recap: a model with random slopes
+
+.large[
+`$$Price_{ij} = \beta_0 + u_i + (\beta_1 + v_i) Satisfaction_{ij} + \varepsilon_{ij}$$`
+
+.question[
+How would I interpret each part of this model?
+]
+]
+
+.large[
+
+* `\(\beta_0\)` = 
+* `\(\beta_0 + u_i\)` = 
+* `\(\beta_1\)` = 
+* `\(\beta_1 + v_i\)` = 
+]
+
+---
+
+### A model with random slopes
+
+.large[
+`$$Price_{ij} = \beta_0 + u_i + (\beta_1 + v_i) Satisfaction_{ij} + \varepsilon_{ij}$$`
+
+* `\(\beta_0\)` = mean price when satisfaction is 0 (average across neighborhoods)
+* `\(\beta_0 + u_i\)` = mean price when satisfaction is 0 in neighborhood `\(i\)`
+* `\(\beta_1\)` = average change in price for a one-unit increase in satisfaction (average across neighborhoods)
+* `\(\beta_1 + v_i\)` = average change in price for a one-unit increase in satisfaction in neighborhood `\(i\)`
+]
+
+---
+
+### Class activity
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_29.html](https://sta214-f22.github.io/class_activities/ca_lecture_29.html)
+]
+
+---
+
+### Class activity
+
+.large[
+Mixed effects models are useful when there are group effects in our data.
+
+.question[
+What are the groups in the data, and what are the observations within each group?
+]
+]
+
+
+---
+
+### Class activity
+
+.large[
+The researchers hypothesize that anxiety levels depend on the type of performance (large or small ensembles), and that the difference in anxiety levels between large and small ensembles varies from person to person.
+
+.question[
+What mixed effects model should the researchers use to investigate their hypothesis?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+`$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$`
+
+.question[
+Interpret the fixed effects and random effects in the model.
+]
+]
+
+---
+
+### Class activity
+
+.large[
+`$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$`
+
+.question[
+Interpret the fixed effects and random effects in the model.
+]
+]
+
+.large[
+* `\(\beta_0\)` = average performance anxiety before small ensemble and solo performances (average across musicians)
+* `\(\beta_0 + u_i\)` = average performance anxiety before small ensemble and solo performances for musician `\(i\)`
+* `\(\beta_1\)` = average difference in anxiety before large ensemble performances (compared to small/solo performances) (average across musicians)
+* `\(\beta_1 + v_i\)` = average difference in anxiety before large ensemble performances for musician `\(i\)`
+]
+
+---
+
+### Fitting a model with random slopes
+
+.large[
+
+```r
+m1 &lt;- lmer(na ~ large + (large|id),
+           data = music)
+```
+
+* This means we include `large` as a fixed effect, *and* we allow the coefficient on `large` to vary from individual to individual
+]
+
+---
+
+### Fitting a model with random slopes
+
+
+
+.large[
+
+```r
+m1 &lt;- lmer(na ~ large + (large|id),
+           data = music)
+summary(m1)
+```
+
+```
+...
+## Fixed effects:
+##             Estimate Std. Error t value
+## (Intercept)  16.7297     0.4908   34.09
+## large        -1.6762     0.5425   -3.09
+## 
+...
+```
+
+`\(\widehat{\beta}_0 = 16.73 \hspace{1cm} \widehat{\beta}_1 = -1.68\)`
+
+.question[
+How would I interpret `\(\widehat{\beta}_0\)` and `\(\widehat{\beta}_1\)`?
+]
+]
+
+---
+
+### Fitting a model with random slopes
+
+.large[
+`$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$`
+
+`\(\widehat{\beta}_0 = 16.73 \hspace{1cm} \widehat{\beta}_1 = -1.68\)`
+
+* The average anxiety before a small/solo performance is 16.73
+* On average, student anxiety decreases by 1.68 before a large performance (compared to a small/solo performance)
+]
+
+---
+
+### Fitting a model with random slopes
+
+.large[
+
+```r
+summary(m1)
+```
+
+```
+...
+## Random effects:
+##  Groups   Name        Variance Std.Dev. Corr 
+##  id       (Intercept)  6.3330  2.5165        
+##           large        0.7429  0.8619   -0.76
+##  Residual             21.7712  4.6660        
+## Number of obs: 497, groups:  id, 37
+...
+```
+
+.question[
+What does this output tell us about the random effects and the noise?
+]
+]
+
+---
+
+### Fitting a model with random slopes
+
+
+.large[
+`$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$`
+
+
+```
+...
+## Random effects:
+##  Groups   Name        Variance Std.Dev. Corr 
+##  id       (Intercept)  6.3330  2.5165        
+##           large        0.7429  0.8619   -0.76
+##  Residual             21.7712  4.6660        
+...
+```
+
+* `\(\widehat{\sigma}_u^2 = 6.333\)` (variability in anxiety before small performances, between students)
+* `\(\widehat{\sigma}_v^2 = 0.743\)` (variability in difference in anxiety before large performances, between students)
+* `\(\widehat{\sigma}_\varepsilon^2 = 21.77\)` (variability in anxiety between performances, within a student)
+]
+
+---
+
+### Correlation between slopes and intercepts
+
+.large[
+`$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$`
+
+
+```
+...
+## Random effects:
+##  Groups   Name        Variance Std.Dev. Corr 
+##  id       (Intercept)  6.3330  2.5165        
+##           large        0.7429  0.8619   -0.76
+##  Residual             21.7712  4.6660        
+...
+```
+
+* `\(\widehat{\rho}_{uv} = -0.76\)` (estimated correlation between the random slope and random intercept for an individual)
+  * Subjects with higher performance anxiety scores for solos and small ensembles tend to have greater decreases in performance anxiety for large ensemble performances
+]
+
+---
+
+### Writing down the model
+
+.large[
+`$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$`
+`\(\varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2) \hspace{1cm} \begin{bmatrix} u_i \\ v_i \end{bmatrix} \overset{iid}{\sim} N \left( \begin{bmatrix} 0 \\ 0 \end{bmatrix}, \begin{bmatrix} \sigma_u^2 &amp; \rho_{uv}\sigma_u \sigma_v \\ \rho_{uv}\sigma_u \sigma_v &amp; \sigma_v^2 \end{bmatrix} \right)\)`
+
+.question[
+Anybody know the name of this new thing?
+]
+]
+
+
+---
+
+### Writing down the model
+
+.large[
+`$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$`
+`\(\varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2) \hspace{1cm} \begin{bmatrix} u_i \\ v_i \end{bmatrix} \overset{iid}{\sim} N \left( \begin{bmatrix} 0 \\ 0 \end{bmatrix}, \begin{bmatrix} \sigma_u^2 &amp; \rho_{uv}\sigma_u \sigma_v \\ \rho_{uv}\sigma_u \sigma_v &amp; \sigma_v^2 \end{bmatrix} \right)\)`
+
+* This just says that both `\(u_i\)` and `\(v_i\)` come from a normal distribution
+  * the variance of `\(u_i\)` is `\(\sigma_u^2\)`
+  * the variance of `\(v_i\)` is `\(\sigma_v^2\)`
+  * the correlation between `\(u_i\)` and `\(v_i\)` is `\(\rho_{uv}\)`
+* *Note:* the population model includes the distribution of the random effects and noise
+
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -10,8 +10,9 @@ November 14
   
 November 16
 : Mixed effects model assumptions
-  : [Slides](https://sta214-f22.github.io/slides/lecture_29.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture_29.html)
-
+  : [Slides](https://sta214-f22.github.io/slides/lecture_29.pdf)
+  
 November 18
 : Random slopes
+  : [Slides](https://sta214-f22.github.io/slides/lecture_30.pdf), [Class Activity](https://sta214-f22.github.io/class_activities/ca_lecture_29.html)
 

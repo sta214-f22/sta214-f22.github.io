@@ -1,0 +1,258 @@
+---
+title: Random slopes
+output:
+  xaringan::moon_reader:
+    css: "lab-slides.css"
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+
+### Recap: a model with random slopes
+
+.large[
+$$Price_{ij} = \beta_0 + u_i + (\beta_1 + v_i) Satisfaction_{ij} + \varepsilon_{ij}$$
+
+.question[
+How would I interpret each part of this model?
+]
+]
+
+.large[
+
+* $\beta_0$ = 
+* $\beta_0 + u_i$ = 
+* $\beta_1$ = 
+* $\beta_1 + v_i$ = 
+]
+
+---
+
+### A model with random slopes
+
+.large[
+$$Price_{ij} = \beta_0 + u_i + (\beta_1 + v_i) Satisfaction_{ij} + \varepsilon_{ij}$$
+
+* $\beta_0$ = mean price when satisfaction is 0 (average across neighborhoods)
+* $\beta_0 + u_i$ = mean price when satisfaction is 0 in neighborhood $i$
+* $\beta_1$ = average change in price for a one-unit increase in satisfaction (average across neighborhoods)
+* $\beta_1 + v_i$ = average change in price for a one-unit increase in satisfaction in neighborhood $i$
+]
+
+---
+
+### Class activity
+
+.large[
+[https://sta214-f22.github.io/class_activities/ca_lecture_29.html](https://sta214-f22.github.io/class_activities/ca_lecture_29.html)
+]
+
+---
+
+### Class activity
+
+.large[
+Mixed effects models are useful when there are group effects in our data.
+
+.question[
+What are the groups in the data, and what are the observations within each group?
+]
+]
+
+
+---
+
+### Class activity
+
+.large[
+The researchers hypothesize that anxiety levels depend on the type of performance (large or small ensembles), and that the difference in anxiety levels between large and small ensembles varies from person to person.
+
+.question[
+What mixed effects model should the researchers use to investigate their hypothesis?
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$
+
+.question[
+Interpret the fixed effects and random effects in the model.
+]
+]
+
+---
+
+### Class activity
+
+.large[
+$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$
+
+.question[
+Interpret the fixed effects and random effects in the model.
+]
+]
+
+.large[
+* $\beta_0$ = average performance anxiety before small ensemble and solo performances (average across musicians)
+* $\beta_0 + u_i$ = average performance anxiety before small ensemble and solo performances for musician $i$
+* $\beta_1$ = average difference in anxiety before large ensemble performances (compared to small/solo performances) (average across musicians)
+* $\beta_1 + v_i$ = average difference in anxiety before large ensemble performances for musician $i$
+]
+
+---
+
+### Fitting a model with random slopes
+
+.large[
+```{r, eval=F}
+m1 <- lmer(na ~ large + (large|id),
+           data = music)
+```
+
+* This means we include `large` as a fixed effect, *and* we allow the coefficient on `large` to vary from individual to individual
+]
+
+---
+
+### Fitting a model with random slopes
+
+```{r include=F}
+library(tidyverse)
+library(lme4)
+library(knitr)
+
+music <- read.csv("musicdata.csv") %>%
+   mutate(large = ifelse(perform_type == "Large Ensemble", 1, 0))
+
+hook_output <- knit_hooks$get("output")
+knit_hooks$set(output = function(x, options) {
+   lines <- options$output.lines
+   if (is.null(lines)) {
+     return(hook_output(x, options))  # pass to default hook
+   }
+   x <- unlist(strsplit(x, "\n"))
+   more <- "..."
+   if (length(lines)==1) {        # first n lines
+     if (length(x) > lines) {
+       # truncate the output, but add ....
+       x <- c(head(x, lines), more)
+     }
+   } else {
+     x <- c(more, x[lines], more)
+   }
+   # paste these lines together
+   x <- paste(c(x, ""), collapse = "\n")
+   hook_output(x, options)
+ })
+```
+
+.large[
+```{r, output.lines = 18:22}
+m1 <- lmer(na ~ large + (large|id),
+           data = music)
+summary(m1)
+```
+
+$\widehat{\beta}_0 = 16.73 \hspace{1cm} \widehat{\beta}_1 = -1.68$
+
+.question[
+How would I interpret $\widehat{\beta}_0$ and $\widehat{\beta}_1$?
+]
+]
+
+---
+
+### Fitting a model with random slopes
+
+.large[
+$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$
+
+$\widehat{\beta}_0 = 16.73 \hspace{1cm} \widehat{\beta}_1 = -1.68$
+
+* The average anxiety before a small/solo performance is 16.73
+* On average, student anxiety decreases by 1.68 before a large performance (compared to a small/solo performance)
+]
+
+---
+
+### Fitting a model with random slopes
+
+.large[
+```{r, output.lines = 11:16}
+summary(m1)
+```
+
+.question[
+What does this output tell us about the random effects and the noise?
+]
+]
+
+---
+
+### Fitting a model with random slopes
+
+
+.large[
+$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$
+
+```{r, echo=F, output.lines = 11:15}
+summary(m1)
+```
+
+* $\widehat{\sigma}_u^2 = 6.333$ (variability in anxiety before small performances, between students)
+* $\widehat{\sigma}_v^2 = 0.743$ (variability in difference in anxiety before large performances, between students)
+* $\widehat{\sigma}_\varepsilon^2 = 21.77$ (variability in anxiety between performances, within a student)
+]
+
+---
+
+### Correlation between slopes and intercepts
+
+.large[
+$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$
+
+```{r, echo=F, output.lines = 11:15}
+summary(m1)
+```
+
+* $\widehat{\rho}_{uv} = -0.76$ (estimated correlation between the random slope and random intercept for an individual)
+  * Subjects with higher performance anxiety scores for solos and small ensembles tend to have greater decreases in performance anxiety for large ensemble performances
+]
+
+---
+
+### Writing down the model
+
+.large[
+$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$
+$\varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2) \hspace{1cm} \begin{bmatrix} u_i \\ v_i \end{bmatrix} \overset{iid}{\sim} N \left( \begin{bmatrix} 0 \\ 0 \end{bmatrix}, \begin{bmatrix} \sigma_u^2 & \rho_{uv}\sigma_u \sigma_v \\ \rho_{uv}\sigma_u \sigma_v & \sigma_v^2 \end{bmatrix} \right)$
+
+.question[
+Anybody know the name of this new thing?
+]
+]
+
+
+---
+
+### Writing down the model
+
+.large[
+$$Anxiety_{ij} = \beta_0 + u_i + (\beta_1 + v_i) LargeEnsemble_{ij} + \varepsilon_{ij}$$
+$\varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2) \hspace{1cm} \begin{bmatrix} u_i \\ v_i \end{bmatrix} \overset{iid}{\sim} N \left( \begin{bmatrix} 0 \\ 0 \end{bmatrix}, \begin{bmatrix} \sigma_u^2 & \rho_{uv}\sigma_u \sigma_v \\ \rho_{uv}\sigma_u \sigma_v & \sigma_v^2 \end{bmatrix} \right)$
+
+* This just says that both $u_i$ and $v_i$ come from a normal distribution
+  * the variance of $u_i$ is $\sigma_u^2$
+  * the variance of $v_i$ is $\sigma_v^2$
+  * the correlation between $u_i$ and $v_i$ is $\rho_{uv}$
+* *Note:* the population model includes the distribution of the random effects and noise
+
+]
