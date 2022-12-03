@@ -16,3 +16,4 @@ November 30
 December 2
 
 : Final exam review
+  : [Review](https://sta214-f22.github.io/slides/Review.pdf)
